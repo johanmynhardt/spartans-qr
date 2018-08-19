@@ -29,8 +29,6 @@
            margin-right: auto;
          }
          
-         
-         
          .form {
            padding: 0.3em;
            text-align: center;
@@ -91,7 +89,25 @@
         <script>
          const qrcode = new QRCode("qrcode");
          const disp = document.querySelector('#text-display');
-         const fields = ['name', 'id'];
+         
+         const app = {
+           db: {
+             'name':'',
+             'id':''
+           },
+           
+           data: () => Object.keys(app.db).reduce((acc, next) => {
+             acc[next] = v(next);
+             return acc;
+           }, {}),
+           
+           fields: () => Object.keys(app.db),
+           
+           serialize: (data = {}) => {
+             app.db = Object.assign({}, app.db, data);
+             return app.fields().map(k => `${app.db[k] || ''}`).join(":");
+           }
+         }
 
          const setT = (sel, val) => {
              document.querySelector(`#${sel}`).value = val;
@@ -102,38 +118,29 @@
            return (value === undefined || value === 'undefined') ? '' : value;
          }
          
-         function getData() {
-           return fields.reduce((acc, next) => {
-             acc[next] = v(next);
-             return acc;
-           }, {});
-         };
-         
-         function getText() {
-             const data = getData();
-             
-             return fields.map(k => `${data[k] || ''}`).join(":");
-         }
-         
          function makeCode(text) {
              qrcode.makeCode(text);
              disp.innerText = text;
          }
-
-         function syncFromHash() {
-             let m = window.location.hash.slice(1).split('&').reduce((acc, next) => {
+         
+         function pMapFromHash() {
+           let m = window.location.hash.slice(1).split('&').filter(x => x.length > 0).reduce((acc, next) => {
                  let kv = next.split('=');
                  acc[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
                  return acc;
              }, {});
              
-             fields.forEach(f => setT(f, (m[f] || '')));
-             makeCode(getText());
+             return m;
+         }
+
+         function syncFromHash() {
+             app.db = Object.assign({}, app.db, pMapFromHash());
+             makeCode(app.serialize());
          };
          
          function updateHash() {
-           const data = getData();
-           window.location.hash = fields.map(f => `${f}=${data[f]}`).join("&");
+           const data = app.data();
+           window.location.hash = app.fields().map(f => `${f}=${data[f]}`).join("&");
          }
 
          window.addEventListener('load', (e) => {
