@@ -9,7 +9,7 @@
          body {
              font-family: sans-serif;
          }
-         #qrwrapper {
+         .app {
              margin: 3em;
              width: 300px;
              margin-left: auto;
@@ -19,13 +19,36 @@
          #qrcode {
 
              margin:1em;
-             width: 260px;
-             height: 260px;
+             width: 256px;
+             height: 256px;
+             margin-left: auto;
+             margin-right: auto;
          }
-         #inputArea {
-             padding: 0.3em;
-             border: 1px solid #666;
+         .-center {
+           margin-left: auto;
+           margin-right: auto;
          }
+         
+         
+         
+         .form {
+           padding: 0.3em;
+           text-align: center;
+           border: 1px solid #666;
+           border-radius: 0.3em;
+         }
+         
+         .form__input {
+           border: 1px inset;
+           margin: 0.8em;
+           margin-left: auto;
+           margin-right: auto;
+           border-radius: 0.5em;
+           display: block;
+           padding: 0.5em;
+           width: calc(100% - 1.6em);
+         }
+         
          #text-display {
              font-size: 16pt;
              font-weight: bold;
@@ -44,20 +67,22 @@
     </head>
     <body>
 
-        <div id="qrwrapper">
-            <div id="inputArea">
+        <div id="app" class="app">
+            <div id="inputArea" class="form">
                 <input placeholder="Name and Surname"
                        type="text"
                        id="name"
-                       data-trigger="makeCode" />
+                       data-trigger="makeCode"
+                       class="form__input"/>
 
                 <input placeholder="Telephone or e-mail"
                        type="text"
                        id="id"
-                       data-trigger="makeCode"/>
+                       data-trigger="makeCode"
+                       class="form__input"/>
             </div>
 
-            <div id="qrcode"></div>
+            <div id="qrcode" class="-center"></div>
             <div id="text-display"></div>
 
             <footer>Spartan Harriers QR Code Generator</footer>
