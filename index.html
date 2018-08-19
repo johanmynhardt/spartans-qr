@@ -44,17 +44,16 @@
     </head>
     <body>
 
-
         <div id="qrwrapper">
             <div id="inputArea">
-                <input placeholder="Name and Surname" 
+                <input placeholder="Name and Surname"
                        type="text"
-                       id="text"
+                       id="name"
                        data-trigger="makeCode" />
 
                 <input placeholder="ID or Telephone"
                        type="text"
-                       id="id-text"
+                       id="id"
                        data-trigger="makeCode"/>
             </div>
 
@@ -67,47 +66,54 @@
         <script>
          const qrcode = new QRCode("qrcode");
          const disp = document.querySelector('#text-display');
+         const fields = ['name', 'id'];
 
          const setT = (sel, val) => {
-             document.querySelector(`#${sel}`).value = val; 
+             document.querySelector(`#${sel}`).value = val;
          };
 
-         const v = (sel) => (document.querySelector(`#${sel}`) || {value: ''}).value;
-         const getData = () => ({
-             names: v('text'),
-             id: v('id-text')
-         }); 
+         const v = (sel) => {
+           const value = (document.querySelector(`#${sel}`) || {value: ''}).value;
+           return (value === undefined || value === 'undefined') ? '' : value;
+         }
+         
+         function getData() {
+           return fields.reduce((acc, next) => {
+             acc[next] = v(next);
+             return acc;
+           }, {});
+         };
          
          function getText() {
              const data = getData();
-
-             return `${data.names || 'no name'} (${data.id || 'no id'})`;
+             
+             return fields.map(k => `${data[k] || ''}`).join(":");
          }
          
-         function makeCode(text) {            
+         function makeCode(text) {
              qrcode.makeCode(text);
              disp.innerText = text;
          }
 
-         const p = h => {
-             const parts = h.slice(1).split('&');
-
-             let m = parts.reduce((acc, next) => {
+         function syncFromHash() {
+             let m = window.location.hash.slice(1).split('&').reduce((acc, next) => {
                  let kv = next.split('=');
                  acc[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
                  return acc;
              }, {});
              
-             setT('text', m.name);
-             setT('id-text', m.id);
+             fields.forEach(f => setT(f, (m[f] || '')));
+             makeCode(getText());
          };
+         
+         function updateHash() {
+           const data = getData();
+           window.location.hash = fields.map(f => `${f}=${data[f]}`).join("&");
+         }
 
          window.addEventListener('load', (e) => {
              [...document.querySelectorAll('[data-trigger=makeCode]')]
-                 .forEach(i => i.addEventListener('input', () => {
-                     const data = getData();
-                     window.location.hash = `name=${data.names}&id=${data.id}`;
-                 }));
+                 .forEach(i => i.addEventListener('input', updateHash));
 
              console.info('hash: ', window.location.hash);
 
@@ -115,14 +121,10 @@
                  document.querySelector('#inputArea').classList.add('hidden');
              }
              
-             p(window.location.hash);
-             makeCode(getText());
+             syncFromHash();
          });
 
-         window.addEventListener('hashchange', e => {
-             p(window.location.hash);
-             makeCode(getText());
-         });
+         window.addEventListener('hashchange', syncFromHash);
         </script>
     </body>
 </html>
