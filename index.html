@@ -82,7 +82,11 @@
 
             <div id="qrcode" class="-center"></div>
             <div id="text-display"></div>
-
+            
+            <span><br/></span>
+            <div id="exposeInput" class="hidden">
+              <button onclick="showInput();">Show Input Form</button>
+            </div>
             <footer>Spartan Harriers QR Code Generator</footer>
         </div>
 
@@ -142,6 +146,11 @@
            const data = app.data();
            window.location.hash = app.fields().map(f => `${f}=${data[f]}`).join("&");
          }
+         
+         function showInput() {
+           document.querySelector('#inputArea').classList.remove('hidden');
+           document.querySelector('#exposeInput').classList.add('hidden');
+         }
 
          window.addEventListener('load', (e) => {
              [...document.querySelectorAll('[data-trigger=makeCode]')]
@@ -151,6 +160,7 @@
 
              if (window.location.hash.length > 0) {
                  document.querySelector('#inputArea').classList.add('hidden');
+                 document.querySelector('#exposeInput').classList.remove('hidden');
              }
              
              syncFromHash();
