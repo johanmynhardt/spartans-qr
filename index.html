@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <title>Spartan Harriers - QR Code Generator</title>
+        <script src="lib/qrcode.min.js"></script>
+        <style>
+
+         body {
+             font-family: sans-serif;
+         }
+         #qrwrapper {
+             margin: 3em;
+             width: 300px;
+             margin-left: auto;
+             margin-right: auto;
+             text-align: center;
+         }
+         #qrcode {
+
+             margin:1em;
+             width: 260px;
+             height: 260px;
+         }
+         #inputArea {
+             padding: 0.3em;
+             border: 1px solid #666;
+         }
+         #text-display {
+             font-size: 16pt;
+             font-weight: bold;
+         }
+
+         footer {
+             margin-top: 3em;
+             font-size: 8pt;
+         }
+
+         .hidden {
+             display: none;
+         }
+
+        </style>
+    </head>
+    <body>
+
+
+        <div id="qrwrapper">
+            <div id="inputArea">
+                <input placeholder="Name and Surname" 
+                       type="text"
+                       id="text"
+                       data-trigger="makeCode" />
+
+                <input placeholder="ID or Telephone"
+                       type="text"
+                       id="id-text"
+                       data-trigger="makeCode"/>
+            </div>
+
+            <div id="qrcode"></div>
+            <div id="text-display"></div>
+
+            <footer>Spartan Harriers QR Code Generator</footer>
+        </div>
+
+        <script>
+         const qrcode = new QRCode("qrcode");
+         const disp = document.querySelector('#text-display');
+
+         const setT = (sel, val) => {
+             document.querySelector(`#${sel}`).value = val; 
+         };
+
+         const v = (sel) => (document.querySelector(`#${sel}`) || {value: ''}).value;
+         const getData = () => ({
+             names: v('text'),
+             id: v('id-text')
+         }); 
+         
+         function getText() {
+             const data = getData();
+
+             return `${data.names || 'no name'} (${data.id || 'no id'})`;
+         }
+         
+         function makeCode(text) {            
+             qrcode.makeCode(text);
+             disp.innerText = text;
+         }
+
+         const p = h => {
+             const parts = h.slice(1).split('&');
+
+             let m = parts.reduce((acc, next) => {
+                 let kv = next.split('=');
+                 acc[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+                 return acc;
+             }, {});
+             
+             setT('text', m.name);
+             setT('id-text', m.id);
+         };
+
+         window.addEventListener('load', (e) => {
+             [...document.querySelectorAll('[data-trigger=makeCode]')]
+                 .forEach(i => i.addEventListener('input', () => {
+                     const data = getData();
+                     window.location.hash = `name=${data.names}&id=${data.id}`;
+                 }));
+
+             console.info('hash: ', window.location.hash);
+
+             if (window.location.hash.length > 0) {
+                 document.querySelector('#inputArea').classList.add('hidden');
+             }
+             
+             p(window.location.hash);
+             makeCode(getText());
+         });
+
+         window.addEventListener('hashchange', e => {
+             p(window.location.hash);
+             makeCode(getText());
+         });
+        </script>
+    </body>
+</html>
