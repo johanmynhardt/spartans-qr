@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+        <title>Spartan Harriers - QR Code Generator</title>
+        <script src="lib/qrcode.min.js"></script>
+        <style>
+
+         body {
+             font-family: sans-serif;
+         }
+         .app {
+             margin: 3em;
+             width: 300px;
+             margin-left: auto;
+             margin-right: auto;
+             text-align: center;
+         }
+         #qrcode {
+
+             margin:1em;
+             width: 256px;
+             height: 256px;
+             margin-left: auto;
+             margin-right: auto;
+         }
+         .-center {
+           margin-left: auto;
+           margin-right: auto;
+         }
+         
+         .form {
+           padding: 0.3em;
+           text-align: center;
+           border: 1px solid #666;
+           border-radius: 0.3em;
+         }
+         
+         .form__input {
+           border: 1px inset;
+           margin: 0.8em;
+           margin-left: auto;
+           margin-right: auto;
+           border-radius: 0.5em;
+           display: block;
+           padding: 0.5em;
+           width: calc(100% - 1.6em);
+         }
+         
+         #text-display {
+             font-size: 16pt;
+             font-weight: bold;
+         }
+
+         footer {
+             margin-top: 3em;
+             font-size: 8pt;
+         }
+
+         .hidden {
+             display: none;
+         }
+         
+         .card {
+           display: table;
+           border: 1px solid #333;
+           border-radius: 0.5em;
+           padding: 1em;
+         }
+         
+         .card__qr-box {
+           display: inline-block;
+         }
+         
+         .card__qr-box > img {
+           width: 128px;
+           height: 128px;
+         }
+         
+         .card__qr-number {
+           display: table-cell;
+           margin: 0.5em;
+           width: 350px;
+           border: 0px solid #333;
+           vertical-align: middle;
+           font-size: 60px;
+         }
+
+        </style>
+    </head>
+    <body>
+
+        <div id="app" class="app">
+            
+            <!--<div class="card">-->
+            <!--  <div id="card-qr-1" class="card__qr-box"></div>-->
+            <!--  <div class="card__qr-number">-->
+            <!--    <span style="text-align: center;">200</span>-->
+            <!--    </div>-->
+            <!--</div>-->
+            
+            <div class="js-card-list">
+              
+            </div>
+
+            <footer>Spartan Harriers QR Code Generator [<a href="raw.html">RAW</a>]</footer>
+        </div>
+
+        <script>
+         
+         
+         const qr = (config = {id:'qrcode', text: 'hello'}) => {
+           const code = new QRCode(config.id);
+           code.makeCode(config.text);
+         }
+         
+         const createCard = (num = 0) => {
+           const t = `
+           <div class="card">
+              <div id="card-qr-${num}" class="card__qr-box"></div>
+              <div class="card__qr-number">
+                <span style="text-align: center;">${num}</span>
+              </div>
+            </div>
+           `;
+           
+           return t;
+         };
+         
+         const attachCard = (t) => {
+           document.querySelector('.js-card-list').innerHTML = document.querySelector('.js-card-list').innerHTML + t;
+         }
+         
+         const card = (n = 0) => {
+           if (document.querySelectorAll(`#card-qr-${n}`).length <= 0) {
+             attachCard(createCard(n));
+             
+           }
+         };
+         
+         const cardQr = (n = 0) => {
+           qr({id: `card-qr-${n}`, text: `${n}`});
+         };
+         
+         const drawSeqs = (n = 20) => {
+             for (i = 1; i < n; i++) card(i);
+             
+             setTimeout(() => {
+               for (i = 1; i < n; i++) cardQr(i);
+             }, 200);
+         };
+
+         window.addEventListener('load', (e) => {
+             //qr({id: 'card-qr-1', text: 'oh-hi'});
+             drawSeqs(20);
+         });
+        </script>
+    </body>
+</html>
