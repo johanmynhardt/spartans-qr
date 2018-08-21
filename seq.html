@@ -109,7 +109,7 @@
               
             </div>
 
-            <footer>Spartan Harriers QR Code Generator [<a href="raw.html">RAW</a>]</footer>
+            <footer>Spartan Harriers QR Code Generator [<a href="raw.html">RAW</a> | <a href="" onclick="event.preventDefault(); promptSeqCount();">Change Count</a>]</footer>
         </div>
 
         <script>
@@ -157,12 +157,20 @@
          };
          
          const drawSeqs = (n = 20) => {
-             for (i = 1; i < n; i++) atachCardNode(createCardNode(i))
+           document.querySelector('.js-card-list').innerHTML = '';
+             for (i = 1; i <= n; i++) atachCardNode(createCardNode(i))
+         };
+         
+         const promptSeqCount = () => {
+           let newSeq = prompt('How many sequence tokens do you need?', 200);
+           if (newSeq) {
+             drawSeqs(Number(newSeq));
+           }
          };
 
          window.addEventListener('load', (e) => {
              //qr({id: 'card-qr-1', text: 'oh-hi'});
-             drawSeqs(200);
+             drawSeqs(2);
          });
         </script>
     </body>
