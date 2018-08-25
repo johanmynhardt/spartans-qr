@@ -4,6 +4,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
         <title>Spartan Harriers - QR Code Generator</title>
         <script src="lib/qrcode.min.js"></script>
+        <script src="assets/js/spartans-lib.js"></script>
+        <script src="assets/js/app.js"></script>
         <style>
 
          body {
@@ -89,84 +91,5 @@
             </div>
             <footer>Spartan Harriers QR Code Generator [<a href="raw.html">RAW</a> | <a href="seq.html">Sequence</a>]</footer>
         </div>
-
-        <script>
-         const qrcode = new QRCode("qrcode");
-         const disp = document.querySelector('#text-display');
-         
-         const app = {
-           db: {
-             'name':'',
-             'id':''
-           },
-           
-           data: () => Object.keys(app.db).reduce((acc, next) => {
-             acc[next] = v(next);
-             return acc;
-           }, {}),
-           
-           fields: () => Object.keys(app.db),
-           
-           serialize: (data = {}) => {
-             app.db = Object.assign({}, app.db, data);
-             return app.fields().map(k => `${app.db[k] || ''}`).join(":");
-           }
-         }
-
-         const setT = (sel, val) => {
-             document.querySelector(`#${sel}`).value = val;
-         };
-
-         const v = (sel) => {
-           const value = (document.querySelector(`#${sel}`) || {value: ''}).value;
-           return (value === undefined || value === 'undefined') ? '' : value;
-         }
-         
-         function makeCode(text) {
-             qrcode.makeCode(text);
-             disp.innerText = text;
-         }
-         
-         function pMapFromHash() {
-           let m = window.location.hash.slice(1).split('&').filter(x => x.length > 0).reduce((acc, next) => {
-                 let kv = next.split('=');
-                 acc[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
-                 return acc;
-             }, {});
-             
-             return m;
-         }
-
-         function syncFromHash() {
-             app.db = Object.assign({}, app.db, pMapFromHash());
-             makeCode(app.serialize());
-         };
-         
-         function updateHash() {
-           const data = app.data();
-           window.location.hash = app.fields().map(f => `${f}=${data[f]}`).join("&");
-         }
-         
-         function showInput() {
-           document.querySelector('#inputArea').classList.remove('hidden');
-           document.querySelector('#exposeInput').classList.add('hidden');
-         }
-
-         window.addEventListener('load', (e) => {
-             [...document.querySelectorAll('[data-trigger=makeCode]')]
-                 .forEach(i => i.addEventListener('input', updateHash));
-
-             console.info('hash: ', window.location.hash);
-
-             if (window.location.hash.length > 0) {
-                 document.querySelector('#inputArea').classList.add('hidden');
-                 document.querySelector('#exposeInput').classList.remove('hidden');
-             }
-             
-             syncFromHash();
-         });
-
-         window.addEventListener('hashchange', syncFromHash);
-        </script>
     </body>
 </html>
