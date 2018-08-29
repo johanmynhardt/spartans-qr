@@ -1,0 +1,29 @@
+<!doctype html>
+
+<html>
+  <head>
+    <title>Scan QR</title>
+    <script type="text/javascript" src="lib/instascan.min.js"></script>
+  </head>
+  <body>
+    <h3>Scan QR</h3>
+    <video id="preview"></video>
+    <pre id="log"></pre>
+    <script type="text/javascript">
+      let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+      scanner.addListener('scan', function (content) {
+        console.log(content);
+        document.querySelector('#log').innerHTML += "\n" + content;
+      });
+      Instascan.Camera.getCameras().then(function (cameras) {
+        if (cameras.length > 0) {
+          scanner.start(cameras[0]);
+        } else {
+          console.error('No cameras found.');
+        }
+      }).catch(function (e) {
+        console.error(e);
+      });
+    </script>
+  </body>
+</html>
