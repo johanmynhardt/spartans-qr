@@ -32,8 +32,6 @@
            document.querySelector(`#${conf.dispid}`).innerText = text;
          }
          
-         
-
          function syncFromHash() {
              app.db = Object.assign({}, app.db, pMapFromHash());
              makeCode(app.serialize());
@@ -46,21 +44,19 @@
              .join("&");
          }
          
-         function showInput() {
-           document.querySelector('#inputArea').classList.remove('hidden');
-           document.querySelector('#exposeInput').classList.add('hidden');
-         }
+         function showInput(show = true) {
+            toggleClasses([
+              {id: 'inputArea', action: show ? 'remove' : 'add', class: 'hidden'},
+              {id: 'exposeInput', action: show ? 'add' : 'remove', class: 'hidden'}
+            ]);
+          }
 
          window.addEventListener('load', (e) => {
              [...document.querySelectorAll('[data-trigger=makeCode]')]
                  .forEach(i => i.addEventListener('input', updateHash));
 
              console.info('hash: ', window.location.hash);
-
-             if (window.location.hash.length > 0) {
-                 document.querySelector('#inputArea').classList.add('hidden');
-                 document.querySelector('#exposeInput').classList.remove('hidden');
-             }
+             showInput(!(window.location.hash.length > 0));
              
              syncFromHash();
          });
