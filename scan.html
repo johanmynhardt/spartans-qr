@@ -10,7 +10,7 @@
     <video id="preview"></video>
     <pre id="log"></pre>
     <script type="text/javascript">
-      let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+      let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false});
       scanner.addListener('scan', function (content) {
         console.log(content);
         document.querySelector('#log').innerHTML += "\n" + content;
