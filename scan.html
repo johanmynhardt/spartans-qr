@@ -7,7 +7,7 @@
     <script type="text/javascript" src="lib/instascan.min.js"></script>
     <style>
       video {
-        width: 50%;
+        width: 33%;
       }
     </style>
   </head>
@@ -16,34 +16,76 @@
     <video id="preview"></video>
     <pre id="log"></pre>
     <script type="text/javascript">
+    const scans = {};
+
+    const scanState = {
+      seq: undefined,
+      id: undefined,
+      complete: () => !!(scanState.seq && scanState.id),
+      reset: () => {
+        log(`scanState reset: ${JSON.stringify(scanState)}`);
+        scanState.seq = undefined;
+        scanState.id = undefined;
+      },
+      capture: () => {
+        scans[new Date().toISOString()] = {
+          id: scanState.id,
+          seq: scanState.seq
+        };
+
+        scanState.reset();
+      }
+    }
+
+    const onScan = (content) => {
+      log(`scan: ${content}`);
+      if (content.indexOf(':') > -1) {
+        // id
+        scanState.id = content;
+      } else {
+        // seq
+        scanState.seq = content;
+      }
+      if (scanState.complete()) {
+        // capture scan
+        scanState.capture();
+        log('scans: ' + JSON.stringify(scans));
+        log('scan captured. next!');
+      } else {
+        log('now scan: ' + (scanState.id ? 'sequence token' : 'user token'));
+      }
+    };
+
       const log = (msg) => {
         console.log('got msg: ', msg);
         document.querySelector('#log').innerHTML += "\n" + msg;
       }
-      
+
       let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false});
-      scanner.addListener('scan', function (content) {
-        log(`scan: ${content}\n`);
-      });
-      Instascan.Camera.getCameras().then(function (cameras) {
-        
-        let camToUse = cameras.filter(cam => cam.name.indexOf('back') > -1 || cam.name.indexOf('FaceTime') > -1)[0];
-        
-        if (camToUse) {
-          scanner.start(camToUse);
-        } else {
-          alert('No usable camera found.');
-        }
-        
-      }).catch(function (e) {
-        log(`error: ${e}`);
-      });
+      scanner.addListener('scan', onScan);
+
+      Instascan.Camera.getCameras()
+        .then(function (cameras) {
+          let camToUse = cameras.filter(cam => cam.name.indexOf('back') > -1 || cam.name.indexOf('FaceTime') > -1)[0];
+
+          if (camToUse) {
+            scanner.start(camToUse);
+          } else {
+            alert('No usable camera found.');
+          }
+        }).catch(function (e) {
+          log(`error: ${e}`);
+        });
+
       Instascan.Camera.getCameras()
         .then(x => x.reduce((acc, cam) => {
           acc += JSON.stringify(cam);
           return acc;
         }, ''))
         .then(found => log(`cameras found: ${found}`));
+
+        setTimeout(() => log('scan user or sequence token.'), 500);
+
     </script>
   </body>
 </html>
