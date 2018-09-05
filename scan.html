@@ -5,25 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
     <title>Scan QR</title>
     <script type="text/javascript" src="lib/instascan.min.js"></script>
-    <style>
-      video {
-        width: 33%;
-      }
-      button {
-        text-transform: uppercase;
-        border-radius: 0.3em;
-        box-shadow: 0px 0px 5px 0px;
-        padding: 0.7em;
-        font-size: 14pt;
-      }
-    </style>
+    <link href="assets/css/scan-style.css" rel="stylesheet"/>
   </head>
   <body>
+    <nav>
+      <ul>
+        <li><a href="scan-data.html">View Data</a>
+      </ul>
+    </nav>
     <h3>Scan QR</h3>
+    <button class="js-button-scan" onclick="optics.scan();">scan</button>
+    <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
     <video id="preview"></video>
-    <button onclick="optics.scan();">scan</button>
-    <button onclick="clearLog();">clear</button>
-    <button onclick="log(JSON.stringify(store.listScans()));">list</button>
     <pre id="log"></pre>
     <script type="text/javascript">
 
@@ -47,7 +40,17 @@
       scan: () => {
         if (optics.scanner) {
           optics.scanner.start(optics.camera);
-          //setTimeout(() => optics.scanner.stop(), 3000);
+          document.querySelector('.js-button-scan').setAttribute('hidden', true);
+          document.querySelector('.js-button-stop-scan').removeAttribute('hidden');
+          //setTimeout(() => optics.scanner.stop(), 10000);
+        }
+      },
+
+      stopScan: () => {
+        if (optics.scanner) {
+          optics.scanner.stop();
+          document.querySelector('.js-button-stop-scan').setAttribute('hidden', true);
+          document.querySelector('.js-button-scan').removeAttribute('hidden');
         }
       }
     };

@@ -1,0 +1,59 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <title>Scan QR</title>
+    <script type="text/javascript" src="lib/instascan.min.js"></script>
+    <link href="assets/css/scan-style.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="scan.html">Scan</a>
+      </ul>
+    </nav>
+    <h3>List Data</h3>
+    <button onclick="clearLog();">clear</button>
+    <button onclick="log(store.listScans().map(JSON.stringify).join('\n'));">list</button>
+    <button onclick="exportCSV()">Export CSV</button>
+    <pre id="log"></pre>
+    <script type="text/javascript">
+
+    const store = {
+      listScans: () => JSON.parse(localStorage.scans || '[]'),
+      addScan: (scan) => {
+        let scans = store.listScans();
+        scans.push(scan);
+        localStorage.scans = JSON.stringify(scans);
+        return {
+          scan: scan,
+          scanCount: scans.length
+        };
+      },
+      asCSV: () => {
+        return store.listScans()
+          .map(row => Object.values(row).join(','))
+          .join('\n');
+      }
+    };
+
+    const exportCSV = () => {
+      let blob = new Blob([store.asCSV()], {type: 'text/csv'});
+      let link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.click();
+    };
+
+      const log = (msg) => {
+        console.log('got msg: ', msg);
+        let loge = document.querySelector('#log');
+        loge.innerHTML = msg + "\n" + loge.innerHTML;
+      }
+
+      const clearLog = () => document.querySelector('#log').innerHTML = '';
+
+
+    </script>
+  </body>
+</html>
