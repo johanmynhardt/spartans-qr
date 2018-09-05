@@ -8,4 +8,14 @@ button, select, option {
   padding: 0.7em;
   font-size: 14pt;
   margin: 0.5em;
+  border-width: 0;
+}
+
+.button-purge {
+  color: white;
+  font-weight: bold;
+  background-color: rgb(255, 0, 0);
+  outline-color:red;
+  border-color: red;
+  box-shadow: 0 0 7px 0px rgb(255, 0, 0);
 }

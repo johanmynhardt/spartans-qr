@@ -14,10 +14,10 @@
       </ul>
     </nav>
     <h3>List Data</h3>
-    <button onclick="clearLog();">clear</button>
-    <button onclick="store.purge();">purge</button>
-    <button onclick="log(store.listScans().map(JSON.stringify).join('\n'));">list</button>
+
+    <button onclick="clearLog(); log(store.listScans().map(JSON.stringify).join('\n'));">list</button>
     <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="clearLog(); store.purge();" class="button-purge">purge</button>
     <pre id="log"></pre>
     <script type="text/javascript">
 

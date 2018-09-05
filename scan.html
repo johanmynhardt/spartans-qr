@@ -60,17 +60,20 @@
     };
 
     const scanState = {
-      seq: undefined,
-      id: undefined,
-      complete: () => !!(scanState.seq && scanState.id),
+      seq: null,
+      id: null,
+      name: null,
+      complete: () => !!(scanState.seq && scanState.id && scanState.name),
       reset: () => {
         log(`scanState reset: ${JSON.stringify(scanState)}`);
-        scanState.seq = undefined;
-        scanState.id = undefined;
+        scanState.seq = null;
+        scanState.id = null;
+        scanState.name = null;
       },
       capture: () => {
         store.addScan({
           id: scanState.id,
+          name: scanState.name,
           seq: scanState.seq,
           timestamp: new Date().toISOString()
         });
@@ -80,14 +83,16 @@
     }
 
     const onScan = (content) => {
-      optics.scanner.stop();
+      optics.stopScan();
       log(`scan: ${content}`);
       if (content && content.indexOf(':') > -1) {
         // id
-        scanState.id = content;
+        let parts = content.split(':').map(x => (x || '').trim());
+        scanState.id = (parts[1]||'');
+        scanState.name = (parts[0]||'');
       } else if (content) {
         // seq
-        scanState.seq = content;
+        scanState.seq = Number(content.trim());
       }
       if (scanState.complete()) {
         // capture scan
@@ -109,42 +114,6 @@
 
       optics.scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false});
       optics.scanner.addListener('scan', onScan);
-
-      // Instascan.Camera.getCameras()
-      //   .then(function (cameras) {
-      //     let camToUse = cameras.filter(cam => cam.name && (cam.name.indexOf('back') > -1 || cam.name.indexOf('FaceTime') > -1))[0];
-      //     optics.camera = camToUse;
-      //     if (camToUse) {
-      //       //optics.scanner.start(camToUse);
-      //       optics.camera = camToUse;
-      //     } else {
-      //       alert('No usable camera found.');
-      //     }
-      //   }).catch(function (e) {
-      //     log(`error: ${e}`);
-      //   });
-
-      // Instascan.Camera.getCameras()
-      //   .then(function (cameras) {
-      //     let camToUse = cameras.filter(cam => cam.name && (cam.name.indexOf('back') > -1 || cam.name.indexOf('FaceTime') > -1))[0];
-      //     optics.camera = camToUse;
-      //     if (camToUse) {
-      //       //optics.scanner.start(camToUse);
-      //       optics.camera = camToUse;
-      //     } else {
-      //       alert('No usable camera found.');
-      //     }
-      //   }).catch(function (e) {
-      //     log(`error: ${e}`);
-      //   });
-      //
-      // Instascan.Camera.getCameras()
-      //   .then(x => x.reduce((acc, cam) => {
-      //     acc += JSON.stringify(cam);
-      //     return acc;
-      //   }, ''))
-      //   .then(found => log(`cameras found: ${found}`));
-
 
         setTimeout(() => log('scan user or sequence token.'), 500);
 
