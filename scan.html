@@ -14,6 +14,9 @@
       </ul>
     </nav>
     <h3>Scan QR</h3>
+    <select class="js-camera-options">
+      <option>Select Camera</option>
+    </select>
     <button class="js-button-scan" onclick="optics.scan();">scan</button>
     <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
     <video id="preview"></video>
@@ -38,11 +41,12 @@
       camera: undefined,
 
       scan: () => {
-        if (optics.scanner) {
+        if (optics.scanner && optics.camera) {
           optics.scanner.start(optics.camera);
           document.querySelector('.js-button-scan').setAttribute('hidden', true);
           document.querySelector('.js-button-stop-scan').removeAttribute('hidden');
-          //setTimeout(() => optics.scanner.stop(), 10000);
+        } else {
+          alert('please select a camera!');
         }
       },
 
@@ -106,28 +110,72 @@
       optics.scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false});
       optics.scanner.addListener('scan', onScan);
 
-      Instascan.Camera.getCameras()
-        .then(function (cameras) {
-          let camToUse = cameras.filter(cam => cam.name && (cam.name.indexOf('back') > -1 || cam.name.indexOf('FaceTime') > -1))[0];
-          optics.camera = camToUse;
-          if (camToUse) {
-            //optics.scanner.start(camToUse);
-            optics.camera = camToUse;
-          } else {
-            alert('No usable camera found.');
-          }
-        }).catch(function (e) {
-          log(`error: ${e}`);
-        });
+      // Instascan.Camera.getCameras()
+      //   .then(function (cameras) {
+      //     let camToUse = cameras.filter(cam => cam.name && (cam.name.indexOf('back') > -1 || cam.name.indexOf('FaceTime') > -1))[0];
+      //     optics.camera = camToUse;
+      //     if (camToUse) {
+      //       //optics.scanner.start(camToUse);
+      //       optics.camera = camToUse;
+      //     } else {
+      //       alert('No usable camera found.');
+      //     }
+      //   }).catch(function (e) {
+      //     log(`error: ${e}`);
+      //   });
 
-      Instascan.Camera.getCameras()
-        .then(x => x.reduce((acc, cam) => {
-          acc += JSON.stringify(cam);
-          return acc;
-        }, ''))
-        .then(found => log(`cameras found: ${found}`));
+      // Instascan.Camera.getCameras()
+      //   .then(function (cameras) {
+      //     let camToUse = cameras.filter(cam => cam.name && (cam.name.indexOf('back') > -1 || cam.name.indexOf('FaceTime') > -1))[0];
+      //     optics.camera = camToUse;
+      //     if (camToUse) {
+      //       //optics.scanner.start(camToUse);
+      //       optics.camera = camToUse;
+      //     } else {
+      //       alert('No usable camera found.');
+      //     }
+      //   }).catch(function (e) {
+      //     log(`error: ${e}`);
+      //   });
+      //
+      // Instascan.Camera.getCameras()
+      //   .then(x => x.reduce((acc, cam) => {
+      //     acc += JSON.stringify(cam);
+      //     return acc;
+      //   }, ''))
+      //   .then(found => log(`cameras found: ${found}`));
+
 
         setTimeout(() => log('scan user or sequence token.'), 500);
+
+        let camSelect = document.querySelector('select.js-camera-options');
+        Instascan.Camera.getCameras()
+          .then(cameras => {
+            cameras.forEach(camera => {
+              let camOption = document.createElement('option');
+              camOption.value = camera.id;
+              camOption.text = camera.name || 'no name';
+              camSelect.appendChild(camOption);
+            });
+          });
+
+        camSelect.addEventListener('change', e => {
+          console.info('camera changed', e);
+          let targetCamera = e.target.value;
+
+          Instascan.Camera.getCameras()
+            .then(function (cameras) {
+              let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
+              optics.camera = camToUse;
+              if (camToUse) {
+                optics.camera = camToUse;
+              } else {
+                alert('No usable camera found.');
+              }
+            }).catch(function (e) {
+              log(`error: ${e}`);
+            });
+        });
 
     </script>
   </body>

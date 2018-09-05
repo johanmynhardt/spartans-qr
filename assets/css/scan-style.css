@@ -1,7 +1,7 @@
 video {
   width: 33%;
 }
-button {
+button, select, option {
   text-transform: uppercase;
   border-radius: 0.3em;
   box-shadow: 0px 0px 5px 0px;
