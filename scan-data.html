@@ -1,26 +1,27 @@
 <!doctype html>
 
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-    <title>Scan QR</title>
-    <script type="text/javascript" src="lib/instascan.min.js"></script>
-    <link href="assets/css/scan-style.css" rel="stylesheet"/>
-  </head>
-  <body>
-    <nav>
-      <ul>
-        <li><a href="scan.html">Scan</a>
-      </ul>
-    </nav>
-    <h3>List Data</h3>
 
-    <button onclick="clearLog(); log(store.listScans().map(JSON.stringify).join('\n'));">list</button>
-    <button onclick="exportCSV()">Export CSV</button>
-    <button onclick="clearLog(); store.purge();" class="button-purge">purge</button>
-    <pre id="log"></pre>
-    <script type="text/javascript">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+  <title>Scan QR</title>
+  <script type="text/javascript" src="lib/instascan.min.js"></script>
+  <link href="assets/css/scan-style.css" rel="stylesheet" />
+</head>
 
+<body>
+  <nav>
+    <ul>
+      <li><a href="scan.html">Scan</a>
+    </ul>
+  </nav>
+  <h3>List Data</h3>
+
+  <button onclick="clearLog(); log(store.listScans().map(JSON.stringify).join('\n'));">list</button>
+  <button onclick="exportCSV()">Export CSV</button>
+  <button onclick="clearLog(); store.purge();" class="button-purge">purge</button>
+  <pre id="log"></pre>
+  <script type="text/javascript">
     const store = {
       listScans: () => JSON.parse(localStorage.scans || '[]'),
       addScan: (scan) => {
@@ -43,21 +44,22 @@
     };
 
     const exportCSV = () => {
-      let blob = new Blob([store.asCSV()], {type: 'text/csv'});
+      let blob = new Blob([store.asCSV()], {
+        type: 'text/csv'
+      });
       let link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
       link.click();
     };
 
-      const log = (msg) => {
-        console.log('got msg: ', msg);
-        let loge = document.querySelector('#log');
-        loge.innerHTML = msg + "\n" + loge.innerHTML;
-      }
+    const log = (msg) => {
+      console.log('got msg: ', msg);
+      let loge = document.querySelector('#log');
+      loge.innerHTML = msg + "\n" + loge.innerHTML;
+    }
 
-      const clearLog = () => document.querySelector('#log').innerHTML = '';
+    const clearLog = () => document.querySelector('#log').innerHTML = '';
+  </script>
+</body>
 
-
-    </script>
-  </body>
 </html>

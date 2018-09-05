@@ -1,28 +1,29 @@
 <!doctype html>
 
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-    <title>Scan QR</title>
-    <script type="text/javascript" src="lib/instascan.min.js"></script>
-    <link href="assets/css/scan-style.css" rel="stylesheet"/>
-  </head>
-  <body>
-    <nav>
-      <ul>
-        <li><a href="scan-data.html">View Data</a>
-      </ul>
-    </nav>
-    <h3>Scan QR</h3>
-    <select class="js-camera-options">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+  <title>Scan QR</title>
+  <script type="text/javascript" src="lib/instascan.min.js"></script>
+  <link href="assets/css/scan-style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <nav>
+    <ul>
+      <li><a href="scan-data.html">View Data</a>
+    </ul>
+  </nav>
+  <h3>Scan QR</h3>
+  <select class="js-camera-options">
       <option>Select Camera</option>
     </select>
-    <button class="js-button-scan" onclick="optics.scan();">scan</button>
-    <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
-    <video id="preview"></video>
-    <pre id="log"></pre>
-    <script type="text/javascript">
-
+  <button class="js-button-scan" onclick="optics.scan();">scan</button>
+  <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
+  <video id="preview"></video>
+  <pre id="log"></pre>
+  <script type="text/javascript">
     const store = {
       listScans: () => JSON.parse(localStorage.scans || '[]'),
       addScan: (scan) => {
@@ -88,8 +89,8 @@
       if (content && content.indexOf(':') > -1) {
         // id
         let parts = content.split(':').map(x => (x || '').trim());
-        scanState.id = (parts[1]||'');
-        scanState.name = (parts[0]||'');
+        scanState.id = (parts[1] || '');
+        scanState.name = (parts[0] || '');
       } else if (content) {
         // seq
         scanState.seq = Number(content.trim());
@@ -104,48 +105,51 @@
       }
     };
 
-      const log = (msg) => {
-        console.log('got msg: ', msg);
-        let loge = document.querySelector('#log');
-        loge.innerHTML = msg + "\n" + loge.innerHTML;
-      }
+    const log = (msg) => {
+      console.log('got msg: ', msg);
+      let loge = document.querySelector('#log');
+      loge.innerHTML = msg + "\n" + loge.innerHTML;
+    }
 
-      const clearLog = () => document.querySelector('#log').innerHTML = '';
+    const clearLog = () => document.querySelector('#log').innerHTML = '';
 
-      optics.scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false});
-      optics.scanner.addListener('scan', onScan);
+    optics.scanner = new Instascan.Scanner({
+      video: document.getElementById('preview'),
+      mirror: false
+    });
+    optics.scanner.addListener('scan', onScan);
 
-        setTimeout(() => log('scan user or sequence token.'), 500);
+    setTimeout(() => log('scan user or sequence token.'), 500);
 
-        let camSelect = document.querySelector('select.js-camera-options');
-        Instascan.Camera.getCameras()
-          .then(cameras => {
-            cameras.forEach(camera => {
-              let camOption = document.createElement('option');
-              camOption.value = camera.id;
-              camOption.text = camera.name || 'no name';
-              camSelect.appendChild(camOption);
-            });
-          });
-
-        camSelect.addEventListener('change', e => {
-          console.info('camera changed', e);
-          let targetCamera = e.target.value;
-
-          Instascan.Camera.getCameras()
-            .then(function (cameras) {
-              let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
-              optics.camera = camToUse;
-              if (camToUse) {
-                optics.camera = camToUse;
-              } else {
-                alert('No usable camera found.');
-              }
-            }).catch(function (e) {
-              log(`error: ${e}`);
-            });
+    let camSelect = document.querySelector('select.js-camera-options');
+    Instascan.Camera.getCameras()
+      .then(cameras => {
+        cameras.forEach(camera => {
+          let camOption = document.createElement('option');
+          camOption.value = camera.id;
+          camOption.text = camera.name || 'no name';
+          camSelect.appendChild(camOption);
         });
+      });
 
-    </script>
-  </body>
+    camSelect.addEventListener('change', e => {
+      console.info('camera changed', e);
+      let targetCamera = e.target.value;
+
+      Instascan.Camera.getCameras()
+        .then(function(cameras) {
+          let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
+          optics.camera = camToUse;
+          if (camToUse) {
+            optics.camera = camToUse;
+          } else {
+            alert('No usable camera found.');
+          }
+        }).catch(function(e) {
+          log(`error: ${e}`);
+        });
+    });
+  </script>
+</body>
+
 </html>
