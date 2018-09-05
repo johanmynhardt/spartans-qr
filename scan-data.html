@@ -15,6 +15,7 @@
     </nav>
     <h3>List Data</h3>
     <button onclick="clearLog();">clear</button>
+    <button onclick="store.purge();">purge</button>
     <button onclick="log(store.listScans().map(JSON.stringify).join('\n'));">list</button>
     <button onclick="exportCSV()">Export CSV</button>
     <pre id="log"></pre>
@@ -35,6 +36,9 @@
         return store.listScans()
           .map(row => Object.values(row).join(','))
           .join('\n');
+      },
+      purge: () => {
+        localStorage.scans = JSON.stringify([]);
       }
     };
 
