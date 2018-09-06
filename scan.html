@@ -6,36 +6,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
   <title>Scan QR</title>
   <script type="text/javascript" src="lib/instascan.min.js"></script>
+  <script type="text/javascript" src="assets/js/toast.js"></script>
+  <script type="text/javascript" src="assets/js/scan.js"></script>
   <link href="assets/css/scan-style.css" rel="stylesheet" />
 </head>
 
 <body>
-  <nav>
+  <nav hidden>
+    <div class="title" onclick="toggleNav(event)">
+      <h3>Menu</h3>
+    </div>
     <ul>
       <li><a href="scan-data.html">View Data</a>
+      <li><a href="#" onclick="toggleConfig(event);">Configure</a>
     </ul>
   </nav>
-  <h3>Scan QR</h3>
-  <select class="js-camera-options">
+
+  <div class="js-toast" hidden>
+    toast!
+  </div>
+
+  <div class="js-config title" hidden>
+    <h3>Configure</h3>
+    <select class="js-camera-options">
       <option>Select Camera</option>
     </select>
-  <button class="js-button-scan" onclick="optics.scan();">scan</button>
-  <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
-  <video id="preview"></video>
-  <pre id="log"></pre>
+
+    <button onclick="toggleConfig(event);">X</button>
+  </div>
+
+  <div class="title">
+    <h3 onclick="toggleNav(event);"><a>&Xi;</a> Spartans QR</h3>
+  </div>
+
+  <div class="content">
+    <button class="js-button-scan" onclick="optics.scan();">scan</button>
+    <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
+    <video id="preview"></video>
+    <button onclick="log('log')">log</button>
+    <pre id="log"></pre>
+  </div>
+
   <script type="text/javascript">
-    const store = {
-      listScans: () => JSON.parse(localStorage.scans || '[]'),
-      addScan: (scan) => {
-        let scans = store.listScans();
-        scans.push(scan);
-        localStorage.scans = JSON.stringify(scans);
-        return {
-          scan: scan,
-          scanCount: scans.length
-        };
-      }
-    };
 
     const optics = {
       scanner: undefined,
@@ -66,18 +78,20 @@
       name: null,
       complete: () => !!(scanState.seq && scanState.id && scanState.name),
       reset: () => {
-        log(`scanState reset: ${JSON.stringify(scanState)}`);
         scanState.seq = null;
         scanState.id = null;
         scanState.name = null;
       },
       capture: () => {
-        store.addScan({
+        let scan = {
           id: scanState.id,
           name: scanState.name,
           seq: scanState.seq,
           timestamp: new Date().toISOString()
-        });
+        };
+        store.addScan(scan);
+
+        log(`scan captured: (${scan.seq}) ${scan.name}`);
 
         scanState.reset();
       }
@@ -85,31 +99,25 @@
 
     const onScan = (content) => {
       optics.stopScan();
-      log(`scan: ${content}`);
       if (content && content.indexOf(':') > -1) {
         // id
         let parts = content.split(':').map(x => (x || '').trim());
         scanState.id = (parts[1] || '');
         scanState.name = (parts[0] || '');
+        Toast.show(`Name: ${scanState.name}`);
+        log(`Name: ${scanState.name}`);
       } else if (content) {
         // seq
         scanState.seq = Number(content.trim());
+        Toast.show(`Seq: ${scanState.seq}`);
       }
       if (scanState.complete()) {
         // capture scan
         scanState.capture();
-        log('scans: ' + JSON.stringify(store.listScans()));
-        log('scan captured. next!');
       } else {
-        log('now scan: ' + (scanState.id ? 'sequence token' : 'user token'));
+        Toast.show('now scan: ' + (scanState.id ? 'sequence token' : 'user token'));
       }
     };
-
-    const log = (msg) => {
-      console.log('got msg: ', msg);
-      let loge = document.querySelector('#log');
-      loge.innerHTML = msg + "\n" + loge.innerHTML;
-    }
 
     const clearLog = () => document.querySelector('#log').innerHTML = '';
 
@@ -149,6 +157,10 @@
           log(`error: ${e}`);
         });
     });
+
+    Toast.hookup('.js-toast');
+
+
   </script>
 </body>
 

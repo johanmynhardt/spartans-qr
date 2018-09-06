@@ -1,6 +1,13 @@
 video {
   width: 33%;
 }
+
+html, body {
+  font-family: sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
 button, select, option {
   text-transform: uppercase;
   border-radius: 0.3em;
@@ -15,7 +22,66 @@ button, select, option {
   color: white;
   font-weight: bold;
   background-color: rgb(255, 0, 0);
-  outline-color:red;
+  outline-color: red;
   border-color: red;
   box-shadow: 0 0 7px 0px rgb(255, 0, 0);
+}
+
+.js-toast {
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.82);
+  color: white;
+  font-size: 16pt;
+  font-family: sans-serif;
+  padding: 1em;
+  border-radius: 1em;
+  width: 80%;
+  top: 25%;
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+
+.title {
+  padding: 0.5em;
+  display: block;
+  background-color: #333;
+  color: white;
+  border-bottom: 1px solid white;
+  width: 100%;
+}
+
+[hidden] {
+  display: none;
+}
+
+nav {
+  position: fixed;
+  width: 80%;
+  color: white;
+  background-color: #333333ed;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+nav > ul > li {
+  display: block;
+  padding: 0.5em;
+  margin: 0.5em;
+}
+
+nav >ul >li > a {
+  color: white;
+  text-decoration: none;
+}
+
+.js-config {
+  width: 100%;
+  color: #fff;
+  background-color: #000000d6;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
