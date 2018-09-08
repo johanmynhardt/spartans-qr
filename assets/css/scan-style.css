@@ -9,7 +9,7 @@ html, body {
   height: 100%;
 }
 
-button, select, option {
+button, select, option, input {
   text-transform: uppercase;
   border-radius: 10px;
   box-shadow: 0px 0px 5px 0px;
@@ -20,6 +20,12 @@ button, select, option {
   outline-color: #666;
   background-color: #666;
   color: white;
+}
+
+input {
+  background-color: initial;
+  color: initial;
+  text-transform: initial;
 }
 
 select {
@@ -164,4 +170,21 @@ th {
 .js-instruction {
   padding: 1em;
   background-color: #eee;
+}
+
+.js-manual-form {
+
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.grow {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
 }
