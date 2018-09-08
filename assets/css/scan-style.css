@@ -160,3 +160,8 @@ th {
   color: #fff;
   background-color: #000000d6;
 }
+
+.js-instruction {
+  padding: 1em;
+  background-color: #eee;
+}

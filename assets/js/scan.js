@@ -83,6 +83,11 @@ const log = (msg) => {
   loge.innerHTML = msg + "\n" + loge.innerHTML;
 }
 
+const instruction = msg => {
+  let instruction = document.querySelector('.js-instruction');
+  instruction.innerText = msg;
+};
+
 const dd = {
   props: {
     logselector: '#log',

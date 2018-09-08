@@ -43,21 +43,11 @@
         <li><button onclick="dd.tabulateData(); toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
         <li><button onclick="exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></li>
         <li><button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge</button></li>
-
-        <!--
-        <hr/>
-        <li><strong>Display</strong></li>
-        <li><button onclick="document.body.requestFullscreen()">Full Screen</button></li> -->
       </ul>
     </div>
   </nav>
 
-  <div class="js-toast" hidden>
-    toast!
-  </div>
-
-
-
+  <div class="js-toast" hidden>toast!</div>
 
 
   <div class="content-wrapper">
@@ -76,6 +66,10 @@
       <hr />
     </div>
 
+    <div class="js-instruction">
+      <i class="fas fa-info"></i> Loading...
+    </div>
+
     <div class="action-bar">
       <button class="js-button-scan" onclick="optics.scan();"><i class="fas fa-expand"></i> scan</button>
       <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden><i class="fas fa-stop"></i> stop</button>
@@ -84,8 +78,6 @@
     </div>
 
   </div>
-
-
 
   <script type="text/javascript">
     const optics = {
@@ -131,12 +123,16 @@
       seq: null,
       id: null,
       name: null,
+      lastScan: null,
+
       complete: () => !!(scanState.seq && scanState.id && scanState.name),
+
       reset: () => {
         scanState.seq = null;
         scanState.id = null;
         scanState.name = null;
       },
+
       capture: () => {
         let scan = {
           id: scanState.id,
@@ -145,6 +141,8 @@
           timestamp: new Date().toISOString()
         };
         store.addScan(scan);
+
+        scanState.lastScan = `(${scan.seq}) ${scan.name}`;
 
         log(`scan captured: (${scan.seq}) ${scan.name}`);
 
@@ -160,7 +158,6 @@
         scanState.id = (parts[1] || '');
         scanState.name = (parts[0] || '');
         Toast.show(`Name: ${scanState.name}`);
-        log(`Name: ${scanState.name}`);
       } else if (content) {
         // seq
         scanState.seq = Number(content.trim());
@@ -169,7 +166,9 @@
       if (scanState.complete()) {
         // capture scan
         scanState.capture();
+        instruction(`Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`);
       } else {
+        instruction(`Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`)
         Toast.show('now scan: ' + (scanState.id ? 'sequence token' : 'user token'));
       }
     };
@@ -180,7 +179,7 @@
     });
     optics.scanner.addListener('scan', onScan);
 
-    setTimeout(() => log('scan user or sequence token.'), 500);
+    setTimeout(() => instruction('Scan user or sequence token.'), 500);
 
     let camSelect = document.querySelector('select.js-camera-options');
     camSelect.addEventListener('change', e => {
