@@ -87,8 +87,9 @@
       scan: () => {
         if (optics.scanner && optics.camera) {
           optics.scanner.start(optics.camera);
-          document.querySelector('.js-button-scan').setAttribute('hidden', true);
-          document.querySelector('.js-button-stop-scan').removeAttribute('hidden');
+          ['.js-button-scan', '.js-button-stop-scan']
+            .map(select => document.querySelector(select))
+            .forEach(toggleHidden);
         } else {
           alert('please select a camera!');
         }
@@ -97,8 +98,9 @@
       stopScan: () => {
         if (optics.scanner) {
           optics.scanner.stop();
-          document.querySelector('.js-button-stop-scan').setAttribute('hidden', true);
-          document.querySelector('.js-button-scan').removeAttribute('hidden');
+          ['.js-button-scan', '.js-button-stop-scan']
+            .map(select => document.querySelector(select))
+            .forEach(toggleHidden);
         }
       },
 
@@ -135,9 +137,9 @@
 
       capture: () => {
         let scan = {
-          id: scanState.id,
-          name: scanState.name,
           seq: scanState.seq,
+          name: scanState.name,
+          id: scanState.id,
           timestamp: new Date().toISOString()
         };
         store.addScan(scan);
@@ -147,37 +149,38 @@
         log(`scan captured: (${scan.seq}) ${scan.name}`);
 
         scanState.reset();
+      },
+
+      onScan: (content) => {
+        optics.stopScan();
+        if (content && content.indexOf(':') > -1) {
+          // id
+          let parts = content.split(':').map(x => (x || '').trim());
+          scanState.id = (parts[1] || '');
+          scanState.name = (parts[0] || '');
+        } else if (content) {
+          // seq
+          scanState.seq = Number(content.trim());
+        }
+        if (scanState.complete()) {
+          // capture scan
+          scanState.capture();
+          let msg = `Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`;
+          instruction(msg);
+          Toast.show(msg);
+        } else {
+          let msg = `Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`;
+          instruction(msg);
+          Toast.show(msg);
+        }
       }
     }
-
-    const onScan = (content) => {
-      optics.stopScan();
-      if (content && content.indexOf(':') > -1) {
-        // id
-        let parts = content.split(':').map(x => (x || '').trim());
-        scanState.id = (parts[1] || '');
-        scanState.name = (parts[0] || '');
-        Toast.show(`Name: ${scanState.name}`);
-      } else if (content) {
-        // seq
-        scanState.seq = Number(content.trim());
-        Toast.show(`Seq: ${scanState.seq}`);
-      }
-      if (scanState.complete()) {
-        // capture scan
-        scanState.capture();
-        instruction(`Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`);
-      } else {
-        instruction(`Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`)
-        Toast.show('now scan: ' + (scanState.id ? 'sequence token' : 'user token'));
-      }
-    };
 
     optics.scanner = new Instascan.Scanner({
       video: document.getElementById('preview'),
       mirror: false
     });
-    optics.scanner.addListener('scan', onScan);
+    optics.scanner.addListener('scan', scanState.onScan);
 
     setTimeout(() => instruction('Scan user or sequence token.'), 500);
 
