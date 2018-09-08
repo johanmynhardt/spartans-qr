@@ -17,7 +17,7 @@ button, select, option {
   font-size: 14pt;
   margin: 0.5em;
   border-width: 0;
-  outline-color: limegreen;
+  outline-color: #666;
   background-color: #666;
   color: white;
 }
@@ -139,6 +139,21 @@ nav > div > ul > li > a {
 nav > div > ul > li > button {
   width: 100%;
   margin: 0;
+  text-align: left;
+}
+
+.datatable {
+  border-collapse: collapse;
+}
+
+th {
+  background-color: #eee;
+  text-transform: uppercase;
+}
+
+.datatable * > td, th {
+  border: 1px solid #666;
+  padding: 0.4em;
 }
 
 .js-config {

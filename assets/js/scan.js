@@ -24,6 +24,7 @@ const store = {
   listScans: () => JSON.parse(localStorage.scans || '[]'),
   getCameraId: () => localStorage.cameraId,
   saveCameraId: id => localStorage.cameraId = id,
+
   addScan: (scan) => {
     let scans = store.listScans();
     scans.push(scan);
@@ -33,11 +34,33 @@ const store = {
       scanCount: scans.length
     };
   },
+
   asCSV: () => {
     return [Object.keys(store.listScans()[0]).join(',')]
       .concat(store.listScans().map(row => Object.values(row).join(',')))
       .join('\n');
   },
+
+  asHTML: () => {
+    let buffer = [];
+    let headers = Object.keys(store.listScans()[0]);
+
+    buffer.push(`<table class="datatable">`);
+    buffer.push(`<thead><tr>`);
+    headers.forEach(header => buffer.push(`<th>${header}</th>`));
+    buffer.push(`</tr></thead>`);
+
+    buffer.push(`<tbody>`);
+    store.listScans().forEach(row => {
+      buffer.push(`<tr>`);
+      Object.values(row).forEach(field => buffer.push(`<td nowrap>${field}</td>`));
+      buffer.push(`</tr>`);
+    })
+    buffer.push(`</tbody>`);
+
+    return buffer.join('\n');
+  },
+
   purge: () => {
     if (window.confirm('Really WIPE out all records?')) {
       localStorage.scans = JSON.stringify([]);
@@ -58,4 +81,22 @@ const log = (msg) => {
   console.log('got msg: ', msg);
   let loge = document.querySelector('#log');
   loge.innerHTML = msg + "\n" + loge.innerHTML;
+}
+
+const dd = {
+  props: {
+    logselector: '#log',
+    tableselector: '.js-datatable'
+  },
+
+  clearLog: () => {
+    [dd.props.logselector,dd.props.tableselector]
+      .forEach(select => document.querySelector(select).innerHTML = '');
+  },
+
+  tabulateData: () => {
+    dd.clearLog();
+    document.querySelector(dd.props.tableselector).innerHTML = store.asHTML();
+  }
+
 }
