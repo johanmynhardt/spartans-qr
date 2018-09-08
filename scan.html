@@ -20,45 +20,73 @@
 
   <script type="text/javascript" src="lib/instascan.min.js"></script>
   <script type="text/javascript" src="assets/js/toast.js"></script>
-  <script type="text/javascript" src="assets/js/scan.js"></script>
+
+    <script type="text/javascript" src="assets/js/scan.js"></script>
   <link href="assets/css/scan-style.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 </head>
 
 <body>
+
+  <!-- NAVIGATION -->
   <nav hidden>
-    <div class="title-bar" onclick="toggleNav(event)">
+    <div class="title-bar" onclick="UI.toggleNav(event)">
       <h3 style="padding-left: 0.5em;"><i class="fas fa-bars"></i> Menu</h3>
     </div>
+
+    <!-- NAVIGATION CONTENT -->
     <div class="flex scroll">
       <ul>
         <li><i class="fas fa-camera"></i> <strong>Camera</strong></li>
         <li>
           <select class="js-camera-options">
-         <option>Select Camera</option>
-        </select>
+            <option>Select Camera</option>
+          </select>
         </li>
         <hr />
         <li><i class="fas fa-database"></i> <strong>Data</strong></li>
-        <li><button onclick="dd.tabulateData(); toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
-        <li><button onclick="exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></li>
+        <li><button onclick="dd.tabulateData(); UI.toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
+        <li><button onclick="store.exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></li>
         <li><button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge</button></li>
       </ul>
     </div>
   </nav>
 
+  <!-- TOAST -->
   <div class="js-toast" hidden>toast!</div>
 
-
   <div class="content-wrapper">
-    <div class="title-bar" onclick="toggleNav(event);">
-      <h3 style="padding-left: 0.5em;"> <i class="fas fa-caret-square-down"></i> Spartans QR</h3>
+    <!-- TITLE BAR  -->
+    <div class="title-bar" onclick="UI.toggleNav(event);">
+      <h3 style="padding-left: 0.5em;">
+        <i class="fas fa-caret-square-down"></i> Spartans QR
+      </h3>
     </div>
 
+    <!-- MAIN CONTENT  -->
     <div class="js-content content">
-      <div style="text-align: center; margin: 1em;">
+
+      <div class="js-manual-form with-margin" hidden>
+        <h3>Manual Entry</h3>
+
+        <div class="row">
+          <input type="text" placeholder="Name" name="name" class="full-width">
+        </div>
+        <div class="row">
+          <input type="text" placeholder="Telephone/Email" name="id" class="full-width">
+        </div>
+
+        <div class="row">
+          <button onclick="store.discardManualEntry();"><i class="fas fa-trash"></i></button>
+          <span class="grow"></span>
+          <button onclick="store.commitManualEntry();"><i class="fas fa-save"></i> Save</button>
+        </div>
+      </div>
+
+      <div class="js-preview" style="text-align: center; margin: 1em;">
         <video id="preview"></video>
       </div>
+
       <div class="with-margin with-border-top">
         <pre id="log"></pre>
         <div class="js-datatable"></div>
@@ -66,151 +94,32 @@
       <hr />
     </div>
 
+    <!-- INSTRUCTION BAR  -->
     <div class="js-instruction">
       <i class="fas fa-info"></i> Loading...
     </div>
 
+    <!--  ACTION BAR  -->
     <div class="action-bar">
-      <button class="js-button-scan" onclick="optics.scan();"><i class="fas fa-expand"></i> scan</button>
-      <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden><i class="fas fa-stop"></i> stop</button>
+      <button class="js-button-scan" onclick="optics.scan();">
+        <i class="fas fa-expand"></i> scan
+      </button>
 
-      <button onclick="dd.clearLog();"> <i class="fas fa-eraser"></i> Clear</button>
+      <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>
+        <i class="fas fa-stop"></i> stop
+      </button>
+
+      <button onclick="dd.clearLog();">
+        <i class="fas fa-eraser"></i> Clear
+      </button>
+
+      <button onclick="UI.showManualForm();">
+        <i class="fas fa-user-plus"></i>
+      </button>
     </div>
-
+    <!-- END -->
   </div>
 
-  <script type="text/javascript">
-    const optics = {
-      scanner: undefined,
-      camera: undefined,
-
-      scan: () => {
-        if (optics.scanner && optics.camera) {
-          optics.scanner.start(optics.camera);
-          ['.js-button-scan', '.js-button-stop-scan']
-            .map(select => document.querySelector(select))
-            .forEach(toggleHidden);
-        } else {
-          alert('please select a camera!');
-        }
-      },
-
-      stopScan: () => {
-        if (optics.scanner) {
-          optics.scanner.stop();
-          ['.js-button-scan', '.js-button-stop-scan']
-            .map(select => document.querySelector(select))
-            .forEach(toggleHidden);
-        }
-      },
-
-      selectCamera: (targetCamera) => {
-        Instascan.Camera.getCameras()
-          .then(function(cameras) {
-            let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
-            optics.camera = camToUse;
-            if (camToUse) {
-              optics.camera = camToUse;
-              store.saveCameraId(camToUse.id);
-            } else {
-              alert('No usable camera found.');
-            }
-          }).catch(function(e) {
-            log(`error: ${e}`);
-          });
-      }
-    };
-
-    const scanState = {
-      seq: null,
-      id: null,
-      name: null,
-      lastScan: null,
-
-      complete: () => !!(scanState.seq && scanState.id && scanState.name),
-
-      reset: () => {
-        scanState.seq = null;
-        scanState.id = null;
-        scanState.name = null;
-      },
-
-      capture: () => {
-        let scan = {
-          seq: scanState.seq,
-          name: scanState.name,
-          id: scanState.id,
-          timestamp: new Date().toISOString()
-        };
-        store.addScan(scan);
-
-        scanState.lastScan = `(${scan.seq}) ${scan.name}`;
-
-        log(`scan captured: (${scan.seq}) ${scan.name}`);
-
-        scanState.reset();
-      },
-
-      onScan: (content) => {
-        optics.stopScan();
-        if (content && content.indexOf(':') > -1) {
-          // id
-          let parts = content.split(':').map(x => (x || '').trim());
-          scanState.id = (parts[1] || '');
-          scanState.name = (parts[0] || '');
-        } else if (content) {
-          // seq
-          scanState.seq = Number(content.trim());
-        }
-        if (scanState.complete()) {
-          // capture scan
-          scanState.capture();
-          let msg = `Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`;
-          instruction(msg);
-          Toast.show(msg);
-        } else {
-          let msg = `Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`;
-          instruction(msg);
-          Toast.show(msg);
-        }
-      }
-    }
-
-    optics.scanner = new Instascan.Scanner({
-      video: document.getElementById('preview'),
-      mirror: false
-    });
-    optics.scanner.addListener('scan', scanState.onScan);
-
-    setTimeout(() => instruction('Scan user or sequence token.'), 500);
-
-    let camSelect = document.querySelector('select.js-camera-options');
-    camSelect.addEventListener('change', e => {
-      console.info('camera changed', e);
-      let targetCamera = e.target.value;
-
-      optics.selectCamera(targetCamera);
-    });
-
-    Instascan.Camera.getCameras()
-      .then(cameras => {
-        cameras.forEach(camera => {
-          let camOption = document.createElement('option');
-          camOption.value = camera.id;
-          camOption.text = camera.name || 'no name';
-          camSelect.appendChild(camOption);
-        });
-
-        console.info('cameraid: ', store.getCameraId());
-
-        if (store.getCameraId()) {
-          camSelect.value = store.getCameraId();
-          optics.selectCamera(store.getCameraId());
-        }
-      });
-
-    Toast.hookup('.js-toast');
-  </script>
 </body>
 
 </html>

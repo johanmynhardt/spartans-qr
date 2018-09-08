@@ -1,23 +1,35 @@
-const toggleHidden = el => {
-  if (el.hidden) {
-    el.removeAttribute('hidden');
-  } else {
-    el.setAttribute('hidden', true);
+const UI = {
+  setHidden: (selector, trueOrFalse) => {
+    let el = document.querySelector(selector);
+    if (trueOrFalse) {
+      el.setAttribute('hidden', true);
+    } else {
+      el.removeAttribute('hidden');
+    }
+  },
+
+  toggleHidden: el => {
+    if (el.hidden) {
+      el.removeAttribute('hidden');
+    } else {
+      el.setAttribute('hidden', true);
+    }
+  },
+
+  toggleBySelector: selector => {
+    UI.toggleHidden(document.querySelector(selector));
+  },
+
+  toggleNav: event => {
+    event.preventDefault();
+    UI.toggleBySelector('nav');
+  },
+
+  showManualForm: () => {
+    optics.stopScan();
+    ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
+    return null;
   }
-}
-
-const toggleConfig = event => {
-  event.preventDefault();
-  let config = document.querySelector('div.js-config');
-  let content = document.querySelector('div.js-content');
-
-  [config, content].forEach(toggleHidden);
-};
-
-const toggleNav = event => {
-  event.preventDefault();
-  let nav = document.querySelector('nav');
-  nav.hidden = !(nav.hidden);
 };
 
 const store = {
@@ -61,20 +73,45 @@ const store = {
     return buffer.join('\n');
   },
 
+  exportCSV: () => {
+    let blob = new Blob([store.asCSV()], {
+      type: 'text/csv'
+    });
+    let link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.click();
+  },
+
   purge: () => {
     if (window.confirm('Really WIPE out all records?')) {
       localStorage.scans = JSON.stringify([]);
     }
-  }
-};
+  },
 
-const exportCSV = () => {
-  let blob = new Blob([store.asCSV()], {
-    type: 'text/csv'
-  });
-  let link = document.createElement('a');
-  link.href = window.URL.createObjectURL(blob);
-  link.click();
+  discardManualEntry: () => {
+    let manualForm = document.querySelector('.js-manual-form');
+    ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
+    manualForm.querySelector('[name=name]').value = null;
+    manualForm.querySelector('[name=id]').value = null;
+    return null;
+  },
+
+  commitManualEntry: () => {
+    let manualForm = document.querySelector('.js-manual-form');
+    let name = manualForm.querySelector('[name=name]');
+    let id = manualForm.querySelector('[name=id]');
+
+    let content = [name.value, id.value].join(':');
+    scanState.onScan(content);
+
+    ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
+
+    name.value = null;
+    id.value = null;
+    return null;
+  }
+
+
 };
 
 const log = (msg) => {
@@ -95,8 +132,8 @@ const dd = {
   },
 
   clearLog: () => {
-    [dd.props.logselector,dd.props.tableselector]
-      .forEach(select => document.querySelector(select).innerHTML = '');
+    [dd.props.logselector, dd.props.tableselector]
+    .forEach(select => document.querySelector(select).innerHTML = '');
   },
 
   tabulateData: () => {
@@ -104,4 +141,141 @@ const dd = {
     document.querySelector(dd.props.tableselector).innerHTML = store.asHTML();
   }
 
+};
+
+const optics = {
+  scanner: undefined,
+  camera: undefined,
+
+  scan: () => {
+    if (!document.querySelector('.js-manual-form').hidden) {
+      ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
+    }
+    if (optics.scanner && optics.camera) {
+      optics.scanner.start(optics.camera);
+      ['.js-button-scan', '.js-button-stop-scan']
+      .map(select => document.querySelector(select))
+        .forEach(UI.toggleHidden);
+    } else {
+      alert('please select a camera!');
+    }
+  },
+
+  stopScan: () => {
+    if (optics.scanner) {
+      optics.scanner.stop();
+      UI.setHidden('.js-button-scan', false);
+      UI.setHidden('.js-button-stop-scan', true);
+    }
+  },
+
+  selectCamera: (targetCamera) => {
+    Instascan.Camera.getCameras()
+      .then(function(cameras) {
+        let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
+        optics.camera = camToUse;
+        if (camToUse) {
+          optics.camera = camToUse;
+          store.saveCameraId(camToUse.id);
+        } else {
+          alert('No usable camera found.');
+        }
+      }).catch(function(e) {
+        log(`error: ${e}`);
+      });
+  }
+};
+
+const scanState = {
+  seq: null,
+  id: null,
+  name: null,
+  lastScan: null,
+
+  complete: () => !!(scanState.seq && scanState.id && scanState.name),
+
+  reset: () => {
+    scanState.seq = null;
+    scanState.id = null;
+    scanState.name = null;
+  },
+
+  capture: () => {
+    let scan = {
+      seq: scanState.seq,
+      name: scanState.name,
+      id: scanState.id,
+      timestamp: new Date().toISOString()
+    };
+    store.addScan(scan);
+
+    scanState.lastScan = `(${scan.seq}) ${scan.name}`;
+
+    log(`scan captured: (${scan.seq}) ${scan.name}`);
+
+    scanState.reset();
+  },
+
+  onScan: (content) => {
+    optics.stopScan();
+    if (content && content.indexOf(':') > -1) {
+      // id
+      let parts = content.split(':').map(x => (x || '').trim());
+      scanState.id = (parts[1] || '');
+      scanState.name = (parts[0] || '');
+    } else if (content) {
+      // seq
+      scanState.seq = Number(content.trim());
+    }
+    if (scanState.complete()) {
+      // capture scan
+      scanState.capture();
+      let msg = `Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`;
+      instruction(msg);
+      Toast.show(msg);
+    } else {
+      let msg = `Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`;
+      instruction(msg);
+      Toast.show(msg);
+    }
+  }
 }
+
+
+
+window.addEventListener('load', () => {
+
+  optics.scanner = new Instascan.Scanner({
+    video: document.getElementById('preview'),
+    mirror: false
+  });
+  optics.scanner.addListener('scan', scanState.onScan);
+
+  let camSelect = document.querySelector('select.js-camera-options');
+  camSelect.addEventListener('change', e => {
+    console.info('camera changed', e);
+    let targetCamera = e.target.value;
+
+    optics.selectCamera(targetCamera);
+  });
+
+  Instascan.Camera.getCameras()
+    .then(cameras => {
+      cameras.forEach(camera => {
+        let camOption = document.createElement('option');
+        camOption.value = camera.id;
+        camOption.text = camera.name || 'no name';
+        camSelect.appendChild(camOption);
+      });
+
+      console.info('cameraid: ', store.getCameraId());
+
+      if (store.getCameraId()) {
+        camSelect.value = store.getCameraId();
+        optics.selectCamera(store.getCameraId());
+      }
+      instruction('Scan user or sequence token.')
+    });
+
+  Toast.hookup('.js-toast');
+});
