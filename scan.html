@@ -26,17 +26,21 @@
 </head>
 
 <body>
+
+  <!-- NAVIGATION -->
   <nav hidden>
     <div class="title-bar" onclick="toggleNav(event)">
       <h3 style="padding-left: 0.5em;"><i class="fas fa-bars"></i> Menu</h3>
     </div>
+
+    <!-- NAVIGATION CONTENT -->
     <div class="flex scroll">
       <ul>
         <li><i class="fas fa-camera"></i> <strong>Camera</strong></li>
         <li>
           <select class="js-camera-options">
-         <option>Select Camera</option>
-        </select>
+            <option>Select Camera</option>
+          </select>
         </li>
         <hr />
         <li><i class="fas fa-database"></i> <strong>Data</strong></li>
@@ -47,14 +51,18 @@
     </div>
   </nav>
 
+  <!-- TOAST -->
   <div class="js-toast" hidden>toast!</div>
 
-
   <div class="content-wrapper">
+    <!-- TITLE BAR  -->
     <div class="title-bar" onclick="toggleNav(event);">
-      <h3 style="padding-left: 0.5em;"> <i class="fas fa-caret-square-down"></i> Spartans QR</h3>
+      <h3 style="padding-left: 0.5em;">
+        <i class="fas fa-caret-square-down"></i> Spartans QR
+      </h3>
     </div>
 
+    <!-- MAIN CONTENT  -->
     <div class="js-content content">
       <div style="text-align: center; margin: 1em;">
         <video id="preview"></video>
@@ -66,15 +74,24 @@
       <hr />
     </div>
 
+    <!-- INSTRUCTION BAR  -->
     <div class="js-instruction">
       <i class="fas fa-info"></i> Loading...
     </div>
 
+    <!--  ACTION BAR  -->
     <div class="action-bar">
-      <button class="js-button-scan" onclick="optics.scan();"><i class="fas fa-expand"></i> scan</button>
-      <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden><i class="fas fa-stop"></i> stop</button>
+      <button class="js-button-scan" onclick="optics.scan();">
+        <i class="fas fa-expand"></i> scan
+      </button>
 
-      <button onclick="dd.clearLog();"> <i class="fas fa-eraser"></i> Clear</button>
+      <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>
+        <i class="fas fa-stop"></i> stop
+      </button>
+
+      <button onclick="dd.clearLog();">
+        <i class="fas fa-eraser"></i> Clear
+      </button>
     </div>
 
   </div>
@@ -88,7 +105,7 @@
         if (optics.scanner && optics.camera) {
           optics.scanner.start(optics.camera);
           ['.js-button-scan', '.js-button-stop-scan']
-            .map(select => document.querySelector(select))
+          .map(select => document.querySelector(select))
             .forEach(toggleHidden);
         } else {
           alert('please select a camera!');
@@ -99,7 +116,7 @@
         if (optics.scanner) {
           optics.scanner.stop();
           ['.js-button-scan', '.js-button-stop-scan']
-            .map(select => document.querySelector(select))
+          .map(select => document.querySelector(select))
             .forEach(toggleHidden);
         }
       },
