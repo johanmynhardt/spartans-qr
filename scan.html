@@ -4,6 +4,7 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Scan QR</title>
   <script type="text/javascript" src="lib/instascan.min.js"></script>
   <script type="text/javascript" src="assets/js/toast.js"></script>
@@ -13,42 +14,76 @@
 
 <body>
   <nav hidden>
-    <div class="title" onclick="toggleNav(event)">
-      <h3>Menu</h3>
+    <div class="title-bar" onclick="toggleNav(event)">
+      <h3 style="padding-left: 1em;">Menu</h3>
     </div>
-    <ul>
-      <li><a href="scan-data.html">View Data</a>
-      <li><a href="#" onclick="toggleConfig(event);">Configure</a>
-    </ul>
+    <div class="flex scroll">
+      <ul>
+        <li><strong>Camera</strong></li>
+        <li>
+          <select class="js-camera-options">
+         <option>Select Camera</option>
+        </select>
+        </li>
+        <hr />
+        <li><strong>Data</strong></li>
+        <li><button onclick="clearLog(); log(store.listScans().map(JSON.stringify).join('\n')); toggleNav(event);">list</button></li>
+        <li><button onclick="exportCSV()">Export CSV</button></li>
+        <li><button onclick="clearLog(); store.purge();" class="button-purge">purge</button></li>
+
+        <hr/>
+        <li><strong>Display</strong></li>
+        <li><button onclick="document.body.requestFullscreen()">Full Screen</button>
+      </ul>
+    </div>
   </nav>
 
   <div class="js-toast" hidden>
     toast!
   </div>
 
-  <div class="js-config title" hidden>
-    <h3>Configure</h3>
-    <select class="js-camera-options">
-      <option>Select Camera</option>
-    </select>
 
-    <button onclick="toggleConfig(event);">X</button>
+
+
+
+  <div class="content-wrapper">
+    <div class="title-bar">
+      <h3 onclick="toggleNav(event);" style="padding-left: 1em;">Spartans QR</h3>
+    </div>
+
+    <div class="js-content content">
+      <div style="text-align: center; margin: 1em;">
+        <video id="preview"></video>
+      </div>
+      <div class="with-margin with-border-top">
+        <pre id="log"></pre>
+      </div>
+      <hr />
+    </div>
+
+    <div class="js-config content" hidden>
+      <h3>Configure</h3>
+
+
+      <button onclick="toggleConfig(event);">X</button>
+    </div>
+
+
+    <div class="action-bar">
+      <button class="js-button-scan" onclick="optics.scan();">scan</button>
+      <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
+
+      <button onclick="clearLog();"> Clear</button>
+
+      <!-- <button onclick="log('log')">log</button> -->
+
+    </div>
+
   </div>
 
-  <div class="title">
-    <h3 onclick="toggleNav(event);"><a>&Xi;</a> Spartans QR</h3>
-  </div>
 
-  <div class="content">
-    <button class="js-button-scan" onclick="optics.scan();">scan</button>
-    <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>stop</button>
-    <video id="preview"></video>
-    <button onclick="log('log')">log</button>
-    <pre id="log"></pre>
-  </div>
 
   <script type="text/javascript">
-
     const optics = {
       scanner: undefined,
       camera: undefined,
@@ -69,6 +104,22 @@
           document.querySelector('.js-button-stop-scan').setAttribute('hidden', true);
           document.querySelector('.js-button-scan').removeAttribute('hidden');
         }
+      },
+
+      selectCamera: (targetCamera) => {
+        Instascan.Camera.getCameras()
+          .then(function(cameras) {
+            let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
+            optics.camera = camToUse;
+            if (camToUse) {
+              optics.camera = camToUse;
+              store.saveCameraId(camToUse.id);
+            } else {
+              alert('No usable camera found.');
+            }
+          }).catch(function(e) {
+            log(`error: ${e}`);
+          });
       }
     };
 
@@ -130,6 +181,13 @@
     setTimeout(() => log('scan user or sequence token.'), 500);
 
     let camSelect = document.querySelector('select.js-camera-options');
+    camSelect.addEventListener('change', e => {
+      console.info('camera changed', e);
+      let targetCamera = e.target.value;
+
+      optics.selectCamera(targetCamera);
+    });
+
     Instascan.Camera.getCameras()
       .then(cameras => {
         cameras.forEach(camera => {
@@ -138,29 +196,16 @@
           camOption.text = camera.name || 'no name';
           camSelect.appendChild(camOption);
         });
+
+        console.info('cameraid: ', store.getCameraId());
+
+        if (store.getCameraId()) {
+          camSelect.value = store.getCameraId();
+          optics.selectCamera(store.getCameraId());
+        }
       });
 
-    camSelect.addEventListener('change', e => {
-      console.info('camera changed', e);
-      let targetCamera = e.target.value;
-
-      Instascan.Camera.getCameras()
-        .then(function(cameras) {
-          let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
-          optics.camera = camToUse;
-          if (camToUse) {
-            optics.camera = camToUse;
-          } else {
-            alert('No usable camera found.');
-          }
-        }).catch(function(e) {
-          log(`error: ${e}`);
-        });
-    });
-
     Toast.hookup('.js-toast');
-
-
   </script>
 </body>
 

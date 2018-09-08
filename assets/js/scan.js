@@ -1,11 +1,17 @@
+const toggleHidden = el => {
+  if (el.hidden) {
+    el.removeAttribute('hidden');
+  } else {
+    el.setAttribute('hidden', true);
+  }
+}
+
 const toggleConfig = event => {
   event.preventDefault();
   let config = document.querySelector('div.js-config');
-  if (config.hidden) {
-    config.removeAttribute('hidden');
-  } else {
-    config.setAttribute('hidden', true);
-  }
+  let content = document.querySelector('div.js-content');
+
+  [config, content].forEach(toggleHidden);
 };
 
 const toggleNav = event => {
@@ -16,6 +22,8 @@ const toggleNav = event => {
 
 const store = {
   listScans: () => JSON.parse(localStorage.scans || '[]'),
+  getCameraId: () => localStorage.cameraId,
+  saveCameraId: id => localStorage.cameraId = id,
   addScan: (scan) => {
     let scans = store.listScans();
     scans.push(scan);

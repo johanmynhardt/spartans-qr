@@ -6,16 +6,24 @@ html, body {
   font-family: sans-serif;
   padding: 0;
   margin: 0;
+  height: 100%;
 }
 
 button, select, option {
   text-transform: uppercase;
-  border-radius: 0.3em;
+  border-radius: 10px;
   box-shadow: 0px 0px 5px 0px;
   padding: 0.7em;
   font-size: 14pt;
   margin: 0.5em;
   border-width: 0;
+  outline-color: limegreen;
+  background-color: #666;
+  color: white;
+}
+
+select {
+  margin: 0;
 }
 
 .button-purge {
@@ -42,6 +50,32 @@ button, select, option {
   flex: 1;
 }
 
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content {
+  flex: 1;
+  flex-grow: 8;
+  overflow-y: scroll;
+}
+
+.title-bar {
+  background-color: #333;
+  color: white;
+  border-bottom: 1px solid white;
+}
+
+.action-bar {
+  flex: 1;
+  background-color: black;
+  color: white;
+  display: block;
+  width: 100%;
+}
+
 .title {
   padding: 0.5em;
   display: block;
@@ -51,37 +85,63 @@ button, select, option {
   width: 100%;
 }
 
+.with-margin {
+  margin: 1em;
+}
+
+.with-border-top {
+  border-top: 1px solid #666;
+}
+
 [hidden] {
   display: none;
 }
 
 nav {
+  display: flex;
+  flex-direction: column;
   position: fixed;
   width: 80%;
   color: white;
-  background-color: #333333ed;
-  top: 0;
-  left: 0;
+  background-color: #000000c7;
+  /* top: 0; */
+  /* left: 0; */
   height: 100%;
+  z-index: 99999;
 }
 
-nav > ul > li {
+
+.flex {
+  flex: 1;
+  flex-grow: 8;
+}
+
+.scroll {
+  overflow-y: scroll;
+}
+
+nav > div > ul > li {
   display: block;
   padding: 0.5em;
   margin: 0.5em;
 }
 
-nav >ul >li > a {
+
+nav > div > ul {
+  padding: 0;
+}
+
+nav > div > ul > li > a {
   color: white;
   text-decoration: none;
 }
 
-.js-config {
+nav > div > ul > li > button {
   width: 100%;
+  margin: 0;
+}
+
+.js-config {
   color: #fff;
   background-color: #000000d6;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
 }
