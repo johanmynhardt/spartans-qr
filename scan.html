@@ -38,15 +38,29 @@
     <div class="flex scroll">
       <ul>
         <li><i class="fas fa-camera"></i> <strong>Camera</strong></li>
+
         <li>
           <select class="js-camera-options">
             <option>Select Camera</option>
           </select>
         </li>
-        <hr />
+      </ul>
+
+      <ul>
+        <li><i class="fas fa-calendar-alt"></i> <strong>Session</strong></li>
+
+        <li>
+          <span class="form-hint">Select session date:</span>
+          <input type="date" data-date/>
+        </li>
+      </ul>
+
+      <ul>
         <li><i class="fas fa-database"></i> <strong>Data</strong></li>
+
         <li><button onclick="dd.tabulateData(); UI.toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
         <li><button onclick="store.exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></li>
+        <li hidden data-migrate><button onclick="store.migrate()"><i class="fas fa-directions"></i> Migrate</button></li>
         <li><button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge</button></li>
       </ul>
     </div>
@@ -87,7 +101,7 @@
         <div class="row">
           <button onclick="store.discardManualEntry();"><i class="fas fa-trash"></i></button>
           <span class="grow"></span>
-          <button onclick="store.commitManualEntry();"><i class="fas fa-save"></i> Save</button>
+          <button onclick="store.commitManualEntry();" class="primary"><i class="fas fa-save"></i> Save</button>
         </div>
       </div>
 
@@ -109,13 +123,16 @@
 
     <!--  ACTION BAR  -->
     <div class="action-bar">
-      <button class="js-button-scan" onclick="optics.scan();">
+      <div class="row">
+      <button class="js-button-scan primary" onclick="optics.scan();">
         <i class="fas fa-expand"></i> scan
       </button>
 
-      <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>
+      <button class="js-button-stop-scan primary" onclick="optics.stopScan();" hidden>
         <i class="fas fa-stop"></i> stop
       </button>
+
+      <span class="flex"></span>
 
       <button onclick="dd.clearLog();">
         <i class="fas fa-eraser"></i> Clear
@@ -124,6 +141,7 @@
       <button onclick="UI.showManualForm();">
         <i class="fas fa-user-plus"></i>
       </button>
+    </div>
     </div>
     <!-- END -->
   </div>

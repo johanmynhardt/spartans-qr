@@ -71,7 +71,8 @@ select {
 .title-bar {
   background-color: #333;
   color: white;
-  border-bottom: 1px solid white;
+  /* border-bottom: 1px solid white; */
+  box-shadow: 0px 0px 10px 0px #FFF;
 }
 
 .action-bar {
@@ -95,6 +96,10 @@ select {
   margin: 1em;
 }
 
+.with-margin-bottom {
+  margin-bottom: 0.5em;
+}
+
 .with-border-top {
   border-top: 1px solid #666;
 }
@@ -107,7 +112,7 @@ nav {
   display: flex;
   flex-direction: column;
   position: fixed;
-  width: 80%;
+  width: 100%;
   color: white;
   background-color: #000000c7;
   /* top: 0; */
@@ -148,6 +153,18 @@ nav > div > ul > li > button {
   text-align: left;
 }
 
+nav > div > ul > li > input {
+  font-family: sans-serif;
+  background-color: #666;
+  color: white;
+  margin: 0;
+}
+
+.primary {
+  background-color: #0a93ff;
+  /* border: 2px green solid; */
+}
+
 .datatable {
   border-collapse: collapse;
 }
@@ -181,10 +198,25 @@ th {
   flex-direction: row;
 }
 
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
 .grow {
   flex: 1;
 }
 
 .full-width {
   width: 100%;
+}
+
+.warning {
+  color: #F00;
+}
+
+.form-hint {
+  font-size: smaller;
+  display: block;
+  margin: 0.3em;
 }

@@ -21,7 +21,10 @@ const UI = {
   },
 
   toggleNav: event => {
-    event.preventDefault();
+    if (event && event.preventDefault) {
+      event.preventDefault();
+    }
+
     UI.toggleBySelector('nav');
   },
 
@@ -33,14 +36,68 @@ const UI = {
 };
 
 const store = {
-  listScans: () => JSON.parse(localStorage.scans || '[]'),
+  maidenSession: '2018-09-06',
+
   getCameraId: () => localStorage.cameraId,
   saveCameraId: id => localStorage.cameraId = id,
 
+  getSessionId: () => localStorage.sessionId,
+  saveSessionId: id => localStorage.sessionId = id,
+
+  serialize: (key, data) => {
+    localStorage[key] = JSON.stringify(data);
+  },
+
+  unserialize: (key, defaultVal = '{}') => {
+    return JSON.parse(localStorage[key] || defaultVal);
+  },
+
+  sessions: () => store.unserialize('sessions'),
+
+  currentSession: () => (store.getSessionId() || store.maidenSession),
+
+  // remove localStorage.scans in favour of multiple session storage.
+  migrate: () => {
+    if (localStorage.scans) {
+      console.info('localStorage.scans found. Doing migration to localStorage.sessions[\'' + store.maidenSession + '\']')
+      let scans = store.unserialize('scans', '[]');
+      if (scans.length > 0) {
+        let sessions = store.sessions();
+        sessions[store.maidenSession] = [].concat((sessions[store.maidenSession] || []), scans);
+        store.serialize('sessions', sessions);
+        localStorage.removeItem('scans');
+        let migrate = document.querySelector('[data-migrate]');
+        migrate.setAttribute('hidden', true);
+        alert(`Migrated ${scans.length} scans.`);
+      } else {
+        alert(`localStorage.scans found, but it is an empty collection.`);
+      }
+    } else {
+      console.info('localStorage.scans not found. Migration not required.')
+    }
+  },
+
+  hookMigrateIfRequired: () => {
+    if (localStorage.scans) {
+      let migrate = document.querySelector('[data-migrate]');
+      migrate.removeAttribute('hidden');
+    }
+  },
+
+  listScans: () => {
+    let session = store.currentSession();
+    return {
+      session: session,
+      scans: store.sessions()[session]
+    };
+  },
+
   addScan: (scan) => {
-    let scans = store.listScans();
+    let sessions = store.sessions();
+    let scans = (sessions[store.currentSession()] || []);
     scans.push(scan);
-    localStorage.scans = JSON.stringify(scans);
+    sessions[store.currentSession()] = scans;
+    store.serialize('sessions', sessions);
     return {
       scan: scan,
       scanCount: scans.length
@@ -48,14 +105,22 @@ const store = {
   },
 
   asCSV: () => {
-    return [Object.keys(store.listScans()[0]).join(',')]
-      .concat(store.listScans().map(row => Object.values(row).join(',')))
+    let scans = store.listScans().scans;
+    if (!scans) {
+      return undefined;
+    }
+    return [Object.keys(scans[0]).join(',')]
+      .concat(scans.map(row => Object.values(row).join(',')))
       .join('\n');
   },
 
   asHTML: () => {
     let buffer = [];
-    let headers = Object.keys(store.listScans()[0]);
+    let scans = store.listScans().scans;
+    if (!scans) {
+      return `<pre class="warning">No scans in store for current session.</pre>`;
+    }
+    let headers = Object.keys(scans[0]);
 
     buffer.push(`<table class="datatable">`);
     buffer.push(`<thead><tr>`);
@@ -63,7 +128,7 @@ const store = {
     buffer.push(`</tr></thead>`);
 
     buffer.push(`<tbody>`);
-    store.listScans().forEach(row => {
+    scans.forEach(row => {
       buffer.push(`<tr>`);
       Object.values(row).forEach(field => buffer.push(`<td nowrap>${field}</td>`));
       buffer.push(`</tr>`);
@@ -74,7 +139,14 @@ const store = {
   },
 
   exportCSV: () => {
-    let blob = new Blob([store.asCSV()], {
+    let csvData = store.asCSV();
+    if (!csvData) {
+      instruction('No data available for export.');
+      UI.toggleNav({});
+      return;
+    }
+
+    let blob = new Blob([csvData], {
       type: 'text/csv'
     });
     let link = document.createElement('a');
@@ -84,7 +156,11 @@ const store = {
 
   purge: () => {
     if (window.confirm('Really WIPE out all records?')) {
-      localStorage.scans = JSON.stringify([]);
+      if (localStorage.scans) {
+        localStorage.removeItem('scans');
+      }
+
+      store.serialize('sessions', {});
     }
   },
 
@@ -110,8 +186,6 @@ const store = {
     id.value = null;
     return null;
   }
-
-
 };
 
 const log = (msg) => {
@@ -278,4 +352,20 @@ window.addEventListener('load', () => {
     });
 
   Toast.hookup('.js-toast');
+
+  store.hookMigrateIfRequired();
+
+  let sessionDisplay = document.querySelector('[data-session-display]');
+  sessionDisplay.innerText = store.currentSession();
+
+  let sessionSelect = document.querySelector('[data-date]');
+  sessionSelect.value = store.currentSession();
+  console.info('attaching event listener to sessionSelect: ', sessionSelect);
+  sessionSelect.addEventListener('input', e => {
+    let session = (e.target.value || store.maidenSession);
+    instruction(`Session changed: ${session}`);
+    sessionDisplay.innerText = session;
+    store.saveSessionId(session);
+    UI.toggleNav(e);
+  });
 });
