@@ -31,7 +31,7 @@
   <!-- NAVIGATION -->
   <nav hidden>
     <div class="title-bar" onclick="UI.toggleNav(event)">
-      <h3 style="padding-left: 0.5em;"><i class="fas fa-bars"></i> Menu</h3>
+      <h3 class="with-margin"><i class="fas fa-bars"></i> &nbsp;Menu</h3>
     </div>
 
     <!-- NAVIGATION CONTENT -->
@@ -58,8 +58,10 @@
   <div class="content-wrapper">
     <!-- TITLE BAR  -->
     <div class="title-bar" onclick="UI.toggleNav(event);">
-      <h3 style="padding-left: 0.5em;">
-        <i class="fas fa-caret-square-down"></i> Spartans QR
+      <h3 class="with-margin">
+        <span class="row">
+        <i class="fas fa-caret-square-down"></i>&nbsp; Spartans QR <span class="flex"></span> <span data-session-display></span>
+      </span>
       </h3>
     </div>
 
@@ -69,11 +71,17 @@
       <div class="js-manual-form with-margin" hidden>
         <h3>Manual Entry</h3>
 
-        <div class="row">
-          <input type="text" placeholder="Name" name="name" class="full-width">
+        <div class="row with-margin-bottom">
+          <div class="col full-width">
+            <label>Name</label>
+            <input type="text" name="name">
+          </div>
         </div>
         <div class="row">
-          <input type="text" placeholder="Telephone/Email" name="id" class="full-width">
+          <div class="col full-width">
+            <label>Telephone/Email</label>
+            <input type="text" name="id">
+          </div>
         </div>
 
         <div class="row">
