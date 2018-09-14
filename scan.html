@@ -31,22 +31,36 @@
   <!-- NAVIGATION -->
   <nav hidden>
     <div class="title-bar" onclick="UI.toggleNav(event)">
-      <h3 style="padding-left: 0.5em;"><i class="fas fa-bars"></i> Menu</h3>
+      <h3 class="with-margin"><i class="fas fa-bars"></i> &nbsp;Menu</h3>
     </div>
 
     <!-- NAVIGATION CONTENT -->
     <div class="flex scroll">
       <ul>
         <li><i class="fas fa-camera"></i> <strong>Camera</strong></li>
+
         <li>
           <select class="js-camera-options">
             <option>Select Camera</option>
           </select>
         </li>
-        <hr />
+      </ul>
+
+      <ul>
+        <li><i class="fas fa-calendar-alt"></i> <strong>Session</strong></li>
+
+        <li>
+          <span class="form-hint">Select session date:</span>
+          <input type="date" data-date/>
+        </li>
+      </ul>
+
+      <ul>
         <li><i class="fas fa-database"></i> <strong>Data</strong></li>
+
         <li><button onclick="dd.tabulateData(); UI.toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
         <li><button onclick="store.exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></li>
+        <li hidden data-migrate><button onclick="store.migrate()"><i class="fas fa-directions"></i> Migrate</button></li>
         <li><button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge</button></li>
       </ul>
     </div>
@@ -58,8 +72,10 @@
   <div class="content-wrapper">
     <!-- TITLE BAR  -->
     <div class="title-bar" onclick="UI.toggleNav(event);">
-      <h3 style="padding-left: 0.5em;">
-        <i class="fas fa-caret-square-down"></i> Spartans QR
+      <h3 class="with-margin">
+        <span class="row">
+        <i class="fas fa-caret-square-down"></i>&nbsp; Spartans QR <span class="flex"></span> <span data-session-display></span>
+      </span>
       </h3>
     </div>
 
@@ -69,17 +85,23 @@
       <div class="js-manual-form with-margin" hidden>
         <h3>Manual Entry</h3>
 
-        <div class="row">
-          <input type="text" placeholder="Name" name="name" class="full-width">
+        <div class="row with-margin-bottom">
+          <div class="col full-width">
+            <label>Name</label>
+            <input type="text" name="name">
+          </div>
         </div>
         <div class="row">
-          <input type="text" placeholder="Telephone/Email" name="id" class="full-width">
+          <div class="col full-width">
+            <label>Telephone/Email</label>
+            <input type="text" name="id">
+          </div>
         </div>
 
         <div class="row">
           <button onclick="store.discardManualEntry();"><i class="fas fa-trash"></i></button>
           <span class="grow"></span>
-          <button onclick="store.commitManualEntry();"><i class="fas fa-save"></i> Save</button>
+          <button onclick="store.commitManualEntry();" class="primary"><i class="fas fa-save"></i> Save</button>
         </div>
       </div>
 
@@ -101,13 +123,16 @@
 
     <!--  ACTION BAR  -->
     <div class="action-bar">
-      <button class="js-button-scan" onclick="optics.scan();">
+      <div class="row">
+      <button class="js-button-scan primary" onclick="optics.scan();">
         <i class="fas fa-expand"></i> scan
       </button>
 
-      <button class="js-button-stop-scan" onclick="optics.stopScan();" hidden>
+      <button class="js-button-stop-scan primary" onclick="optics.stopScan();" hidden>
         <i class="fas fa-stop"></i> stop
       </button>
+
+      <span class="flex"></span>
 
       <button onclick="dd.clearLog();">
         <i class="fas fa-eraser"></i> Clear
@@ -116,6 +141,7 @@
       <button onclick="UI.showManualForm();">
         <i class="fas fa-user-plus"></i>
       </button>
+    </div>
     </div>
     <!-- END -->
   </div>
