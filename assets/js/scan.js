@@ -312,8 +312,7 @@ const scanState = {
     }
   },
 
-  handlers: [
-    {
+  handlers: [{
       name: 'Set Session',
       test: function(x = '') {
         return x.match(/\[cmd:session:(\d{4}-\d{2}-\d{2})\]/);
@@ -321,11 +320,9 @@ const scanState = {
       fn: function(content) {
         let result = this.test(content);
         if (result[1]) {
-          if (result[1]) {
-            store.saveSessionId(result[1]);
-            instruction(`session set from scan: ${result[1]}`);
-            return true;
-          }
+          store.saveSessionId(result[1]);
+          instruction(`session set from scan: ${result[1]}`);
+          return true;
         }
         return false;
       }
