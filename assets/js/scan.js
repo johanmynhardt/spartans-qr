@@ -292,15 +292,13 @@ const scanState = {
 
   onScan: (content) => {
     optics.stopScan();
-    if (content && content.indexOf(':') > -1) {
-      // id
-      let parts = content.split(':').map(x => (x || '').trim());
-      scanState.id = (parts[1] || '');
-      scanState.name = (parts[0] || '');
-    } else if (content) {
-      // seq
-      scanState.seq = Number(content.trim());
-    }
+
+    let scanResult = scanState.handlers
+      .filter(h => h.test(content))
+      .map(h => [h.name, h.fn(content)]);
+
+    log(scanResult);
+
     if (scanState.complete()) {
       // capture scan
       scanState.capture();
@@ -312,7 +310,58 @@ const scanState = {
       instruction(msg);
       Toast.show(msg);
     }
-  }
+  },
+
+  handlers: [
+    {
+      name: 'Set Session',
+      test: function(x = '') {
+        return x.match(/\[cmd:session:(\d{4}-\d{2}-\d{2})\]/);
+      },
+      fn: function(content) {
+        let result = this.test(content);
+        if (result[1]) {
+          if (result[1]) {
+            store.saveSessionId(result[1]);
+            instruction(`session set from scan: ${result[1]}`);
+            return true;
+          }
+        }
+        return false;
+      }
+    },
+
+    {
+      name: 'Capture user token',
+      test: function(x = '') {
+        return x.match(/^([\w\ ]+){1}:(.+){1}$/);
+      },
+      fn: function(content) {
+        let result = this.test(content);
+        if (result[1] && result[2]) {
+          scanState.id = result[2];
+          scanState.name = result[1];
+          return true;
+        }
+        return false;
+      }
+    },
+
+    {
+      name: 'Capture sequence token',
+      test: function(x = '') {
+        return x.match(/^(\d+)$/);
+      },
+      fn: function(content) {
+        let result = this.test(content);
+        if (result[1]) {
+          scanState.seq = Number(result[1]);
+          return true;
+        }
+        return false;
+      }
+    }
+  ]
 }
 
 
