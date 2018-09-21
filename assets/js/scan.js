@@ -305,11 +305,12 @@ const scanState = {
       let msg = `Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`;
       instruction(msg);
       Toast.show(msg);
-    } else {
-      let msg = `Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`;
-      instruction(msg);
-      Toast.show(msg);
     }
+    // else {
+    //   let msg = `Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`;
+    //   instruction(msg);
+    //   Toast.show(msg);
+    // }
   },
 
   handlers: [{
@@ -353,6 +354,36 @@ const scanState = {
         let result = this.test(content);
         if (result[1]) {
           scanState.seq = Number(result[1]);
+          return true;
+        }
+        return false;
+      }
+    },
+
+    {
+      name: 'Toast',
+      test: function(x = '') {
+        return x.match(/\[cmd:toast:(.+)\]/);
+      },
+      fn: function(content) {
+        let result = this.test(content);
+        console.info('toast result: ', result);
+        if (result[1]) {
+          Toast.show(result[1]);
+          return result[1];
+        }
+        return false;
+      }
+    },
+
+    {
+      name: 'Lap: ping',
+      test: function(x = '') {
+        return x.match(/\[cmd:lap:ping\]/);
+      },
+      fn: function(content) {
+        if (this.test(content)) {
+          // capture lap timestamp
           return true;
         }
         return false;
