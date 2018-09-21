@@ -8,6 +8,14 @@ const UI = {
     }
   },
 
+  setElHidden: (el, trueOrFalse) => {
+    if (trueOrFalse) {
+      el.setAttribute('hidden', true);
+    } else {
+      el.removeAttribute('hidden');
+    }
+  },
+
   toggleHidden: el => {
     if (el.hidden) {
       el.removeAttribute('hidden');
@@ -30,8 +38,18 @@ const UI = {
 
   showManualForm: () => {
     optics.stopScan();
-    ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
+    UI.showDisplays(['.js-manual-form']);
     return null;
+  },
+
+  showDisplays: (toDisplay = []) => {
+    document.querySelector('.js-content')
+      .querySelectorAll('[data-display]')
+      .forEach(x => UI.setElHidden(x, true));
+
+    toDisplay.forEach(sel => {
+      UI.setElHidden(document.querySelector(sel), false);
+    })
   }
 };
 
@@ -166,7 +184,7 @@ const store = {
 
   discardManualEntry: () => {
     let manualForm = document.querySelector('.js-manual-form');
-    ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
+    UI.showDisplays(['.js-preview', '.js-data']);
     manualForm.querySelector('[name=name]').value = null;
     manualForm.querySelector('[name=id]').value = null;
     return null;
@@ -190,6 +208,7 @@ const store = {
 
 const log = (msg) => {
   console.log('got msg: ', msg);
+  instruction(msg);
   let loge = document.querySelector('#log');
   loge.innerHTML = msg + "\n" + loge.innerHTML;
 }
@@ -285,7 +304,7 @@ const scanState = {
 
     scanState.lastScan = `(${scan.seq}) ${scan.name}`;
 
-    log(`scan captured: (${scan.seq}) ${scan.name}`);
+    log(`Scan captured: (${scan.seq}) ${scan.name}`);
 
     scanState.reset();
   },
@@ -295,9 +314,14 @@ const scanState = {
 
     let scanResult = scanState.handlers
       .filter(h => h.test(content))
-      .map(h => [h.name, h.fn(content)]);
+      .map(h => [h.name, h.fn(content)])
+      .filter(x => x);
 
-    log(scanResult);
+      if (scanResult.length === 0) {
+        log(`No scan result! Got: ${content}`);
+      } else {
+        log(scanResult);
+      }
 
     if (scanState.complete()) {
       // capture scan
@@ -339,7 +363,7 @@ const scanState = {
         if (result[1] && result[2]) {
           scanState.id = result[2];
           scanState.name = result[1];
-          return true;
+          return scanState.name;
         }
         return false;
       }
@@ -354,7 +378,7 @@ const scanState = {
         let result = this.test(content);
         if (result[1]) {
           scanState.seq = Number(result[1]);
-          return true;
+          return scanState.seq;
         }
         return false;
       }

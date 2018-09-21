@@ -19,7 +19,9 @@
 
 
   <script type="text/javascript" src="lib/instascan.min.js"></script>
+  <script type="text/javascript" src="lib/qrcode.min.js"></script>
   <script type="text/javascript" src="assets/js/toast.js"></script>
+  <script type="text/javascript" src="assets/js/qr.js"></script>
 
     <script type="text/javascript" src="assets/js/scan.js"></script>
   <link href="assets/css/scan-style.css" rel="stylesheet" />
@@ -63,6 +65,12 @@
         <li hidden data-migrate><button onclick="store.migrate()"><i class="fas fa-directions"></i> Migrate</button></li>
         <li><button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge</button></li>
       </ul>
+
+      <ul>
+        <li><i class="fas fa-chess-board"></i> <strong>QR</strong></li>
+
+        <li><button onclick="UI.toggleNav(event); UI.showDisplays(['.js-qr-generate']); QR.makeCode('xxx', {qrid:'qr-generate'})"><i class="fas fa-cog"></i> Generate</button>
+      </ul>
     </div>
   </nav>
 
@@ -82,7 +90,7 @@
     <!-- MAIN CONTENT  -->
     <div class="js-content content">
 
-      <div class="js-manual-form with-margin" hidden>
+      <div class="js-manual-form with-margin" hidden data-display>
         <h3>Manual Entry</h3>
 
         <div class="row with-margin-bottom">
@@ -105,15 +113,22 @@
         </div>
       </div>
 
-      <div class="js-preview" style="text-align: center; margin: 1em;">
+      <div class="js-preview" style="text-align: center; margin: 1em;" data-display>
         <video id="preview"></video>
       </div>
 
-      <div class="with-margin with-border-top">
+      <div class="js-qr-generate with-margin" hidden data-display>
+        <h3 class="row">QR:Generate <span class="grow"></span> <a onclick="UI.showDisplays(['.js-preview', '.js-data']);"><i class="fas fa-times-circle"></i></a></h3>
+        <div id="qr-generate" class="with-margin">
+        </div>
+        <input class="with-margin" oninput="QR.makeCode(this.value, {qrid: 'qr-generate'})" />
+
+      </div>
+
+      <div class="js-data with-margin with-border-top" data-display>
         <pre id="log"></pre>
         <div class="js-datatable"></div>
       </div>
-      <hr />
     </div>
 
     <!-- INSTRUCTION BAR  -->
