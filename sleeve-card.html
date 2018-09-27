@@ -1,0 +1,133 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <style>
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      font-family: serif;
+    }
+
+    label {
+      font-weight: bold;
+      flex-grow: 1;
+    }
+
+    .body {
+      display: inline-block;
+      padding: 5mm 0 0 0;
+      text-align: center;
+    }
+
+    .card {
+      width: 64mm;
+      height: 90mm;
+      border: 1px solid black;
+      margin: 0 0 3mm 3mm;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .top {
+      width: 45mm;
+      height: 45mm;
+      border: 1px solid black;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 7mm;
+      margin-bottom: 7mm;
+    }
+
+    .bottom {
+      margin-left: auto;
+      margin-right: auto;
+      width: 55mm;
+      border: 0px solid black;
+      text-align: left;
+      font-size: smaller;
+      font-size: 4mm;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: row;
+      margin-top: 3mm;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="body">
+    <div data-template hidden>
+      <div class="card">
+        <div class="top">
+          top
+        </div>
+        <div class="bottom">
+          <div class="row">
+            <label>Name</label>
+            <div data-name>Johan Mynhardt</div>
+          </div>
+
+          <div class="row">
+            <label>Gender</label>
+            <div data-gender>Male</div>
+          </div>
+
+          <div class="row">
+            <label>Member #</label>
+            <div data-member_no>123456789</div>
+          </div>
+
+          <div class="row">
+            <label>Discipline</label>
+            <div data-discipline>Running</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const makeCard = user => {
+      let template = document.querySelector('[data-template]');
+      let div = document.createElement('div');
+      div.classList.add('card');
+      div.innerHTML = template.querySelector('.card').innerHTML;
+
+      Object.keys(user).forEach(key => {
+        let sel = `[data-${key}]`;
+        div.querySelector(sel).innerText = user[key];
+      })
+
+      document.querySelector('.body').appendChild(div);
+    };
+
+    let users = [{
+      name: 'Johan Mynhardt',
+      gender: 'Male',
+      member_no: '239987',
+      discipline: 'Running'
+    }, {
+      name: 'Pietie Poggenpoel',
+      gender: 'Male',
+      member_no: 'x23399',
+      discipline: 'Walking'
+    }, {
+      name: 'Miekie Momberg',
+      gender: 'Female',
+      member_no: 'r98230',
+      discipline: 'Running'
+    }];
+    users.forEach(makeCard);
+    users.forEach(makeCard);
+    users.forEach(makeCard);
+  </script>
+
+</body>
+
+</html>
