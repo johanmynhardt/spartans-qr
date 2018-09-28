@@ -3,7 +3,16 @@
 <html>
 
 <head>
+
+  <script src="lib/qrcode.min.js"></script>
   <style>
+
+  @media print {
+    .no-print {
+      display: none;
+    }
+  }
+
     html,
     body {
       padding: 0;
@@ -17,8 +26,8 @@
     }
 
     .body {
-      display: inline-block;
-      padding: 5mm 0 0 0;
+      display: inline;
+      padding: 0 0 0 0;
       text-align: center;
     }
 
@@ -26,35 +35,68 @@
       width: 64mm;
       height: 90mm;
       border: 1px solid black;
-      margin: 0 0 3mm 3mm;
+      margin: 5mm 0 0mm 3mm;
       display: inline-block;
       text-align: center;
     }
 
     .top {
-      width: 45mm;
-      height: 45mm;
-      border: 1px solid black;
+      width: 50mm;
+      height: 50mm;
+      border: 0px solid black;
       margin-left: auto;
       margin-right: auto;
-      margin-top: 7mm;
+      margin-top: 6mm;
       margin-bottom: 7mm;
+    }
+
+    .top>img {
+      width: inherit;
+      height: inherit;
     }
 
     .bottom {
       margin-left: auto;
       margin-right: auto;
+      margin-top: -2mm;
       width: 55mm;
       border: 0px solid black;
       text-align: left;
-      font-size: smaller;
       font-size: 4mm;
+      padding: 1mm;
+      border-radius: 1mm;
     }
 
     .row {
       display: flex;
       flex-direction: row;
-      margin-top: 3mm;
+      margin-top: 1mm;
+      margin-bottom: 1mm;
+    }
+
+    .border-bottom {
+      border-bottom: 1px solid #aaa;
+    }
+
+    [data-dialog] {
+      text-align: left;
+      margin: 2em;
+      padding: 0.5em;
+      background-color: #fff;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      box-shadow: 0px 2px 8px 0px rgba(0, 0, 0, 0.2);
+      border: 1px solid black;
+      border-radius: 0.2em;
+    }
+
+    button {
+      margin: 0.2em;
+      background-color: #fefefe;
+    }
+    .primary {
+      background-color: #eee;
     }
   </style>
 </head>
@@ -62,71 +104,176 @@
 <body>
 
   <div class="body">
-    <div data-template hidden>
-      <div class="card">
-        <div class="top">
-          top
+
+    <div data-card-list>
+    </div>
+
+    <button class="no-print" onclick="showUserForm(true);">Add Person</button>
+
+    <div data-dialog hidden class="no-print">
+      <h3>Add Person <span></span></h3>
+
+      <div class="row">
+        <label>Name</label>
+        <input type="text" name="name"/>
+      </div>
+
+        <div class="row">
+          <label>Gender</label>
+          <radiogroup>
+            <input type="radio" name="gender" value="Male">Male</input>
+            <input type="radio" name="gender" value="Female">Female</input>
+          </radiogroup>
         </div>
-        <div class="bottom">
-          <div class="row">
-            <label>Name</label>
-            <div data-name>Johan Mynhardt</div>
-          </div>
 
-          <div class="row">
-            <label>Gender</label>
-            <div data-gender>Male</div>
-          </div>
-
-          <div class="row">
-            <label>Member #</label>
-            <div data-member_no>123456789</div>
-          </div>
-
+        <div class="row">
+          <label>Member #</label>
+          <input type="text" name="member_no"/>
+        </div>
           <div class="row">
             <label>Discipline</label>
-            <div data-discipline>Running</div>
+            <radiogroup>
+              <input type="radio" name="discipline" value="Running">Run</input>
+              <input type="radio" name="discipline" value="Walking">Walk</input>
+            </radiogroup>
+          </div>
+
+          <div class="border-bottom"></div>
+
+          <div class="row">
+            <button onclick="showUserForm(false);">Cancel</button>
+            <button class="primary" onclick="addUserFromForm(event);">Submit</button>
+          </div>
+        </div>
+
+        <div data-template hidden>
+          <div class="card">
+            <div class="top" id="">
+            </div>
+            <div class="bottom">
+              <div class="row border-bottom">
+                <label>Name</label>
+                <div data-name>Johan Mynhardt</div>
+              </div>
+
+              <div class="row border-bottom">
+                <label>Gender</label>
+                <div data-gender>Male</div>
+              </div>
+
+              <div class="row border-bottom">
+                <label>Member #</label>
+                <div data-member_no>123456789</div>
+              </div>
+
+              <div class="row border-bottom">
+                <label>Primary Discipline</label>
+                <div data-discipline>Running</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <script>
-    const makeCard = user => {
-      let template = document.querySelector('[data-template]');
-      let div = document.createElement('div');
-      div.classList.add('card');
-      div.innerHTML = template.querySelector('.card').innerHTML;
+      <script>
+        const uuid = function() {
+          var uuid = "",
+            i, random;
+          for (i = 0; i < 32; i++) {
+            random = Math.random() * 16 | 0;
 
-      Object.keys(user).forEach(key => {
-        let sel = `[data-${key}]`;
-        div.querySelector(sel).innerText = user[key];
-      })
+            if (i == 8 || i == 12 || i == 16 || i == 20) {
+              uuid += "-"
+            }
+            uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
+          }
+          return uuid;
+        };
 
-      document.querySelector('.body').appendChild(div);
-    };
+        const qr = (config = {
+          id: 'qrcode',
+          text: 'hello'
+        }) => {
+          const code = new QRCode(config.id);
+          code.makeCode(config.text);
+        };
 
-    let users = [{
-      name: 'Johan Mynhardt',
-      gender: 'Male',
-      member_no: '239987',
-      discipline: 'Running'
-    }, {
-      name: 'Pietie Poggenpoel',
-      gender: 'Male',
-      member_no: 'x23399',
-      discipline: 'Walking'
-    }, {
-      name: 'Miekie Momberg',
-      gender: 'Female',
-      member_no: 'r98230',
-      discipline: 'Running'
-    }];
-    users.forEach(makeCard);
-    users.forEach(makeCard);
-    users.forEach(makeCard);
-  </script>
+        const makeCard = user => {
+          let uuuid = uuid();
+          let template = document.querySelector('[data-template]');
+          let div = document.createElement('div');
+          div.classList.add('card');
+          div.innerHTML = template.querySelector('.card').innerHTML;
+
+          Object.keys(user).forEach(key => {
+            let sel = `[data-${key}]`;
+            div.querySelector(sel).innerText = user[key];
+          });
+
+          div.querySelector('.top').setAttribute('id', `member_no-${user.member_no}-uuid_${uuuid}`);
+          document.querySelector('[data-card-list]').appendChild(div);
+
+          qr({
+            id: `member_no-${user.member_no}-uuid_${uuuid}`,
+            text: `${user.name}:${user.member_no}`
+          });
+        };
+
+        const addUser = (name, gender, member_no, discipline) => {
+          users.push({
+            name: name,
+            gender: gender,
+            member_no: member_no,
+            discipline: discipline
+          });
+
+          document.querySelector('[data-card-list]').innerText = '';
+
+          users.forEach(makeCard);
+        };
+
+
+
+        const showUserForm = (show) => {
+          let dialog = document.querySelector('[data-dialog]');
+          if (show) {
+            dialog.removeAttribute('hidden');
+          } else {
+            dialog.setAttribute('hidden', true);
+          }
+
+        }
+
+        const addUserFromForm = formEvent => {
+          formEvent.preventDefault();
+          formEvent.stopPropagation();
+
+          let dialog = document.querySelector('[data-dialog]');
+          let inputs = dialog.querySelectorAll('input');
+
+          let name = ([...inputs].filter(x => x.name === 'name')[0] || {}).value;
+          let gender = ([...inputs].filter(x => x.name === 'gender').filter(x => x.checked)[0] || {}).value;
+          let member_no = ([...inputs].filter(x => x.name === 'member_no')[0] || {}).value;
+          let discipline = ([...inputs].filter(x => x.name === 'discipline').filter(x => x.checked)[0] || {}).value;
+
+          let newUser = {
+            name: name,
+            gender: gender,
+            member_no: member_no,
+            discipline: discipline
+          };
+          console.info('user: ', newUser);
+          addUser(name, gender, member_no, discipline);
+        };
+
+        let users = [/*{
+          name: 'Johan Mynhardt',
+          gender: 'Male',
+          member_no: '239987',
+          discipline: 'Running'
+        }*/];
+        users.forEach(makeCard);
+      </script>
 
 </body>
 
