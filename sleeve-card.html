@@ -78,7 +78,7 @@
       border-bottom: 1px solid #aaa;
     }
 
-    [data-dialog] {
+    .dialog {
       text-align: left;
       margin: 2em;
       padding: 0.5em;
@@ -98,6 +98,14 @@
     .primary {
       background-color: #eee;
     }
+
+    .flex {
+      display: flex;
+    }
+
+    .grow {
+      flex: 1;
+    }
   </style>
 </head>
 
@@ -109,8 +117,23 @@
     </div>
 
     <button class="no-print" onclick="showUserForm(true);">Add Person</button>
+    <button class="no-print" onclick="showCSVForm(true);">Add from CSV</button>
 
-    <div data-dialog hidden class="no-print">
+    <div data-dialog-csv class="dialog no-print">
+      <h3>Add from CSV</h3>
+
+      <p>Paste cells from Google Sheets here and click Submit.</p>
+
+      <div>
+        <label>CSV</label><br/>
+        <textarea cols="80" rows="20" data-csv></textarea>
+      </div>
+      <div class="flex">
+        <span class="grow"></span><button class="primary" onclick=" processCSV(); showCSVForm(false);">Submit</button>
+      </div>
+    </div>
+
+    <div data-dialog-user hidden class=" dialog no-print">
       <h3>Add Person <span></span></h3>
 
       <div class="row">
@@ -219,6 +242,10 @@
           });
         };
 
+        const clearCards = () => {
+          document.querySelector('[data-card-list]').innerText = '';
+        }
+
         const addUser = (name, gender, member_no, discipline) => {
           users.push({
             name: name,
@@ -227,15 +254,32 @@
             discipline: discipline
           });
 
-          document.querySelector('[data-card-list]').innerText = '';
-
+          clearCards();
           users.forEach(makeCard);
         };
 
+        const showCSVForm = show => {
+          let dialog = document.querySelector('[data-dialog-csv]');
+          if (show) {
+            dialog.removeAttribute('hidden');
+          } else {
+            dialog.setAttribute('hidden', true);
+          }
+        };
 
+        const processCSV = () => {
+          clearCards();
+          users = [];
+          let csvData = document.querySelector('textarea[data-csv]').value;
+          csvData.split('\n')
+            .filter(row => row.indexOf('Membership No.') < 0)
+            .map(row => row.split('\t'))
+            .filter(record => record.filter(field => field).length > 0)
+            .forEach(record => addUser(record[0], record[1], record[2], record[3]));
+        }
 
         const showUserForm = (show) => {
-          let dialog = document.querySelector('[data-dialog]');
+          let dialog = document.querySelector('[data-dialog-user]');
           if (show) {
             dialog.removeAttribute('hidden');
           } else {
@@ -248,7 +292,7 @@
           formEvent.preventDefault();
           formEvent.stopPropagation();
 
-          let dialog = document.querySelector('[data-dialog]');
+          let dialog = document.querySelector('[data-dialog-user]');
           let inputs = dialog.querySelectorAll('input');
 
           let name = ([...inputs].filter(x => x.name === 'name')[0] || {}).value;
