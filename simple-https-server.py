@@ -10,7 +10,7 @@ import BaseHTTPServer, SimpleHTTPServer
 import ssl
 
 #server_ip = '192.168.11.59'
-server_ip = '192.168.8.103'
+server_ip = '192.168.8.101'
 httpd = BaseHTTPServer.HTTPServer((server_ip, 4443), SimpleHTTPServer.SimpleHTTPRequestHandler)
 httpd.socket = ssl.wrap_socket (httpd.socket, certfile='./server.pem', server_side=True)
 httpd.serve_forever()
