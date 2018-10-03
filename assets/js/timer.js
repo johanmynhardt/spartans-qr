@@ -6,6 +6,11 @@ const Timer = {
   start: function() {
     if (!this.laps.genesis) {
       this.laps.genesis = new Date().toISOString();
+      setInterval(() => {
+        window.requestAnimationFrame(() => {
+          document.querySelector('[data-timer-display]').innerText = this.sinceGenesis(new Date().toISOString());
+        })
+      }, 200);
     }
     return this.laps.genesis;
   },

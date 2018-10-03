@@ -84,7 +84,7 @@
     <div class="title-bar" onclick="UI.toggleNav(event);">
       <h3 class="with-margin">
         <span class="row">
-        <i class="fas fa-caret-square-down"></i>&nbsp; Spartans QR <span class="flex"></span> <span data-session-display></span>
+        <i class="fas fa-caret-square-down"></i>&nbsp; Spartans<span class="flex"></span><span data-timer-display>--:--:---</span>&nbsp;|&nbsp;<span data-session-display></span>
       </span>
       </h3>
     </div>
@@ -142,17 +142,20 @@
     <div class="action-bar">
       <div class="row">
       <button class="js-button-scan primary" onclick="optics.scan();">
-        <i class="fas fa-expand"></i> scan
+        <i class="fas fa-expand"></i>
       </button>
 
       <button class="js-button-stop-scan primary" onclick="optics.stopScan();" hidden>
-        <i class="fas fa-stop"></i> stop
+        <i class="fas fa-stop"></i>
       </button>
 
-      <span class="flex"></span>
+            <span class="flex"></span>
+            <button onclick="Timer.start();">Timer</button>
+            <button onclick="log(Timer.lap().display);">Lap</button>
+            <span class="flex"></span>
 
       <button onclick="dd.clearLog();">
-        <i class="fas fa-eraser"></i> Clear
+        <i class="fas fa-eraser"></i>
       </button>
 
       <button onclick="UI.showManualForm();">
