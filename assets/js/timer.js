@@ -1,14 +1,13 @@
 const Timer = {
-  genesis: undefined,
   laps: {},
   _seq: 0,
   _format: 'mm:ss:SSS',
 
   start: function() {
-    if (!this.genesis) {
-      this.genesis = new Date().toISOString();
+    if (!this.laps.genesis) {
+      this.laps.genesis = new Date().toISOString();
     }
-    return this.genesis;
+    return this.laps.genesis;
   },
 
   last: function() {
@@ -22,8 +21,8 @@ const Timer = {
 
   lap: function() {
     let timestamp = new Date().toISOString();
-    let sinceGenesis = this.sinceGenesis();
-    let sinceLast = this._seq === 0 ? sinceGenesis : this.sinceLastLap();
+    let sinceGenesis = this.sinceGenesis(timestamp);
+    let sinceLast = this._seq === 0 ? sinceGenesis : this.sinceLastLap(timestamp);
 
     let result = {
       timestamp: timestamp,
@@ -44,11 +43,26 @@ const Timer = {
     return moment(moment(second).diff(moment(first))).format(this._format);
   },
 
-  sinceGenesis: function() {
-    return this.between(this.genesis, moment.now());
+  sinceGenesis: function(now) {
+    return this.between(this.laps.genesis, now);
   },
 
-  sinceLastLap: function() {
-    return this.between(this.laps[this.last()], moment.now());
+  sinceLastLap: function(now) {
+    return this.between(this.laps[this.last()], now);
+  },
+
+  renderTimestamps: function(laps = {}) {
+    return Object.keys(laps).reduce((acc, key) => {
+      let timestamp = laps[key];
+      let lapsKey = laps[key === '1' ? 'genesis' : Number(key) - 1];
+
+      let sinceGenesis = this.between(laps['genesis'], timestamp);
+      let sinceLast = key === 'genesis' ? undefined : this.between(lapsKey, timestamp);
+      acc[key] = key === 'genesis' ? timestamp : {
+        timestamp: timestamp,
+        display: Number(key) > 1 ? `${sinceGenesis} (+${sinceLast})` : sinceLast
+      };
+      return acc;
+    }, {});
   }
 };
