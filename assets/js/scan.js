@@ -62,15 +62,7 @@ const store = {
   getSessionId: () => localStorage.sessionId,
   saveSessionId: id => localStorage.sessionId = id,
 
-  serialize: (key, data) => {
-    localStorage[key] = JSON.stringify(data);
-  },
-
-  unserialize: (key, defaultVal = '{}') => {
-    return JSON.parse(localStorage[key] || defaultVal);
-  },
-
-  sessions: () => store.unserialize('sessions'),
+  sessions: () => Storage.unserialize('sessions'),
 
   currentSession: () => (store.getSessionId() || store.maidenSession),
 
@@ -78,11 +70,11 @@ const store = {
   migrate: () => {
     if (localStorage.scans) {
       console.info('localStorage.scans found. Doing migration to localStorage.sessions[\'' + store.maidenSession + '\']')
-      let scans = store.unserialize('scans', '[]');
+      let scans = Storage.unserialize('scans', '[]');
       if (scans.length > 0) {
         let sessions = store.sessions();
         sessions[store.maidenSession] = [].concat((sessions[store.maidenSession] || []), scans);
-        store.serialize('sessions', sessions);
+        Storage.serialize('sessions', sessions);
         localStorage.removeItem('scans');
         let migrate = document.querySelector('[data-migrate]');
         migrate.setAttribute('hidden', true);
@@ -178,7 +170,7 @@ const store = {
         localStorage.removeItem('scans');
       }
 
-      store.serialize('sessions', {});
+      Storage.serialize('sessions', {});
     }
   },
 
