@@ -62,60 +62,28 @@ const store = {
   getSessionId: () => localStorage.sessionId,
   saveSessionId: id => localStorage.sessionId = id,
 
-  serialize: (key, data) => {
-    localStorage[key] = JSON.stringify(data);
-  },
-
-  unserialize: (key, defaultVal = '{}') => {
-    return JSON.parse(localStorage[key] || defaultVal);
-  },
-
-  sessions: () => store.unserialize('sessions'),
+  sessions: () => Storage.unserialize('sessions'),
 
   currentSession: () => (store.getSessionId() || store.maidenSession),
-
-  // remove localStorage.scans in favour of multiple session storage.
-  migrate: () => {
-    if (localStorage.scans) {
-      console.info('localStorage.scans found. Doing migration to localStorage.sessions[\'' + store.maidenSession + '\']')
-      let scans = store.unserialize('scans', '[]');
-      if (scans.length > 0) {
-        let sessions = store.sessions();
-        sessions[store.maidenSession] = [].concat((sessions[store.maidenSession] || []), scans);
-        store.serialize('sessions', sessions);
-        localStorage.removeItem('scans');
-        let migrate = document.querySelector('[data-migrate]');
-        migrate.setAttribute('hidden', true);
-        alert(`Migrated ${scans.length} scans.`);
-      } else {
-        alert(`localStorage.scans found, but it is an empty collection.`);
-      }
-    } else {
-      console.info('localStorage.scans not found. Migration not required.')
-    }
-  },
-
-  hookMigrateIfRequired: () => {
-    if (localStorage.scans) {
-      let migrate = document.querySelector('[data-migrate]');
-      migrate.removeAttribute('hidden');
-    }
-  },
 
   listScans: () => {
     let session = store.currentSession();
     return {
       session: session,
-      scans: store.sessions()[session]
+      scans: store.sessions()[session].scans
     };
   },
 
   addScan: (scan) => {
     let sessions = store.sessions();
-    let scans = (sessions[store.currentSession()] || []);
+    let session = sessions[store.currentSession()];
+    let scans = (sessions[store.currentSession()].scans || []);
     scans.push(scan);
-    sessions[store.currentSession()] = scans;
-    store.serialize('sessions', sessions);
+
+    session.scans = scans;
+    sessions[store.currentSession()] = session;
+    Storage.serialize('sessions', sessions);
+
     return {
       scan: scan,
       scanCount: scans.length
@@ -178,7 +146,7 @@ const store = {
         localStorage.removeItem('scans');
       }
 
-      store.serialize('sessions', {});
+      Storage.serialize('sessions', {});
     }
   },
 
@@ -280,6 +248,7 @@ const optics = {
 };
 
 const scanState = {
+  module: 'scanState',
   seq: null,
   id: null,
   name: null,
@@ -311,6 +280,7 @@ const scanState = {
 
   onScan: (content) => {
     optics.stopScan();
+    Journal.capture('onScan content', content);
 
     let scanResult = scanState.handlers
       .filter(h => h.test(content))
@@ -318,6 +288,7 @@ const scanState = {
       .filter(x => x);
 
       if (scanResult.length === 0) {
+        Journal.capture('onScan no-scan-result', content);
         log(`No scan result! Got: ${content}`);
       } else {
         log(scanResult);
@@ -453,8 +424,6 @@ window.addEventListener('load', () => {
     });
 
   Toast.hookup('.js-toast');
-
-  store.hookMigrateIfRequired();
 
   let sessionDisplay = document.querySelector('[data-session-display]');
   sessionDisplay.innerText = store.currentSession();
