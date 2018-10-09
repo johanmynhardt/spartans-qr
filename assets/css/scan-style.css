@@ -11,7 +11,7 @@ html, body {
 
 button, select, option, input {
   text-transform: uppercase;
-  border-radius: 10px;
+  border-radius: 3px;
   box-shadow: 0px 0px 5px 0px;
   padding: 0.7em;
   font-size: 14pt;
@@ -219,4 +219,12 @@ th {
   font-size: smaller;
   display: block;
   margin: 0.3em;
+}
+
+.background-light-red {
+  background-color: #ffe2e2;
+}
+
+.background-light-green {
+  background-color: #e2fff0;
 }
