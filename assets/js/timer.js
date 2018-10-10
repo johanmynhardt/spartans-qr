@@ -1,7 +1,7 @@
 let Timer = {
   laps: {},
   _seq: 0,
-  _format: 'mm:ss:SSS',
+  _format: 'HH:mm:ss:SSS',
 
   start: function() {
     if (!this.laps.genesis) {
@@ -42,6 +42,8 @@ let Timer = {
 
     Journal.capture('timer.lap', result);
 
+    Session.sessionObjectSerializerFor('timer')(Timer);
+
     return result;
   },
 
@@ -51,7 +53,7 @@ let Timer = {
   },
 
   between: function(first, second) {
-    return moment(moment(second).diff(moment(first))).format(this._format);
+    return moment(moment(second).diff(moment(first))).utc().format(Timer._format);
   },
 
   sinceGenesis: function(now) {
@@ -75,5 +77,9 @@ let Timer = {
       };
       return acc;
     }, {});
+  },
+
+  resume: () => {
+    Timer = Object.assign({}, Timer, Session.sessionObjectGetter('timer'))
   }
 };
