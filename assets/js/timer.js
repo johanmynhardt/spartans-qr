@@ -1,18 +1,18 @@
-const Timer = {
+let Timer = {
   laps: {},
   _seq: 0,
   _format: 'mm:ss:SSS',
 
   start: function() {
     if (!this.laps.genesis) {
-      this.laps.genesis = new Date().toISOString();
+      Timer.laps.genesis = new Date().toISOString();
       setInterval(() => {
         window.requestAnimationFrame(() => {
           document.querySelector('[data-timer-display]').innerText = this.sinceGenesis(new Date().toISOString());
         })
       }, 200);
     }
-    return this.laps.genesis;
+    return Timer.laps.genesis;
   },
 
   last: function() {
@@ -25,16 +25,22 @@ const Timer = {
   },
 
   lap: function() {
-    let timestamp = new Date().toISOString();
-    let sinceGenesis = this.sinceGenesis(timestamp);
-    let sinceLast = this._seq === 0 ? sinceGenesis : this.sinceLastLap(timestamp);
+    const timestamp = new Date().toISOString();
+    const sinceGenesis = this.sinceGenesis(timestamp);
+    const sinceLast = this._seq === 0 ? sinceGenesis : this.sinceLastLap(timestamp);
 
-    let result = {
+    const nextIdx = this.next();
+    const result = {
+      seq: nextIdx,
       timestamp: timestamp,
-      display: this._seq === 0 ? sinceLast : `${sinceGenesis} (+${sinceLast})`
+      sinceGenesis: sinceGenesis,
+      sinceLast: sinceLast,
+      display: [nextIdx, nextIdx === 1 ? sinceLast : `${sinceGenesis} (+${sinceLast})`].join(' ')
     };
 
-    this.laps[this.next()] = timestamp;
+    this.laps[nextIdx] = timestamp;
+
+    Journal.capture('timer.lap', result);
 
     return result;
   },
@@ -49,7 +55,7 @@ const Timer = {
   },
 
   sinceGenesis: function(now) {
-    return this.between(this.laps.genesis, now);
+    return this.between(Timer.laps.genesis, now);
   },
 
   sinceLastLap: function(now) {
