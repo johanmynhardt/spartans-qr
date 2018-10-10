@@ -126,7 +126,28 @@
         <div id="qr-generate" class="with-margin">
         </div>
         <input id="qrinput" class="with-margin" oninput="QR.makeCode(this.value, {qrid: 'qr-generate'})" />
+      </div>
 
+      <div class="js-scan-started with-margin" hidden data-display>
+        <h3>Capturing In Progress</h3>
+        <div class="row">
+          <div class="col full-width">
+            <label>Name</label>
+            <input class="js-scan-name" type="text" name="name" readonly>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col full-width">
+            <label>Sequence</label>
+            <input class="js-scan-seq" type="text" name="sequence" readonly>
+          </div>
+        </div>
+        <div class="row">
+          <button onclick="scanState.reset(); scanState.render();" class="js-scan-discard"><i class="fas fa-trash"></i></button>
+          <span class="grow"></span>
+          <button onclick="scanState.reset(); scanState.render(); UI.showDisplays(['.js-data', '.js-preview']); this.setAttribute('hidden', true);"
+              class="js-scan-ok primary" hidden><i class="fas fa-save"></i> OK</button>
+        </div>
       </div>
 
       <div class="js-data with-margin with-border-top" data-display>

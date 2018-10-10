@@ -254,12 +254,19 @@ const scanState = {
   name: null,
   lastScan: null,
 
+  started: () => !!(scanState.seq || scanState.id || scanState.name),
+
   complete: () => !!(scanState.seq && scanState.id && scanState.name),
 
   reset: () => {
     scanState.seq = null;
     scanState.id = null;
     scanState.name = null;
+  },
+
+  render: () => {
+      document.querySelector('.js-scan-name').value = scanState.name;
+      document.querySelector('.js-scan-seq').value = scanState.seq;
   },
 
   capture: () => {
@@ -280,7 +287,7 @@ const scanState = {
 
   onScan: (content) => {
     optics.stopScan();
-    Journal.capture('onScan content', content);
+    Journal.capture('onScan.content', content);
 
     let scanResult = scanState.handlers
       .filter(h => h.test(content))
@@ -288,24 +295,41 @@ const scanState = {
       .filter(x => x);
 
       if (scanResult.length === 0) {
-        Journal.capture('onScan no-scan-result', content);
+        Journal.capture('onScan.no-scan-result', content);
+
+        let colAct = {
+          ['background-light-red']: 'add',
+          ['background-light-green']: 'remove'
+        }
+
+        Object.keys(colAct).forEach(key => {
+          document.querySelector('.js-scan-started').classList[colAct[key]](key)
+        });
+
+        UI.showDisplays(['.js-scan-started', '.js-preview']);
+
+        //document.querySelector('.js-scan-started').classList.add('background-light-red');
         log(`No scan result! Got: ${content}`);
       } else {
         log(scanResult);
       }
 
     if (scanState.complete()) {
+      scanState.render();
       // capture scan
       scanState.capture();
+      document.querySelector('.js-scan-ok').removeAttribute('hidden');
+      document.querySelector('.js-scan-started').classList.add('background-light-green');
       let msg = `Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`;
       instruction(msg);
       Toast.show(msg);
+
     }
-    // else {
-    //   let msg = `Now scan: ${(scanState.id ? 'sequence token' : 'user token')} for ${(scanState.id ? scanState.name : scanState.seq)}`;
-    //   instruction(msg);
-    //   Toast.show(msg);
-    // }
+
+    if (scanState.started()) {
+      UI.showDisplays(['.js-preview', '.js-scan-started'])
+      scanState.render();
+    }
   },
 
   handlers: [{
