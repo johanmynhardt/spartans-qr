@@ -462,4 +462,6 @@ window.addEventListener('load', () => {
     store.saveSessionId(session);
     UI.toggleNav(e);
   });
+
+  Timer.resume();
 });

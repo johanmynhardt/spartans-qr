@@ -2,15 +2,22 @@ let Timer = {
   laps: {},
   _seq: 0,
   _format: 'HH:mm:ss:SSS',
+  _interval: undefined,
 
   start: function() {
     if (!this.laps.genesis) {
       Timer.laps.genesis = new Date().toISOString();
-      setInterval(() => {
+      Timer.running = true;
+      let interval = setInterval(() => {
         window.requestAnimationFrame(() => {
           document.querySelector('[data-timer-display]').innerText = this.sinceGenesis(new Date().toISOString());
         })
       }, 200);
+      Timer._interval = function() {
+        return interval;
+      }
+
+      Session.sessionObjectSerializerFor('timer')(Timer);
     }
     return Timer.laps.genesis;
   },
@@ -80,6 +87,19 @@ let Timer = {
   },
 
   resume: () => {
-    Timer = Object.assign({}, Timer, Session.sessionObjectGetter('timer'))
+    Timer = Object.assign({}, Timer, Session.sessionObjectGetter('timer'));
+
+    if (Timer.running && !Timer._interval) {
+      let interval = setInterval(() => {
+        window.requestAnimationFrame(() => {
+          document.querySelector('[data-timer-display]').innerText = Timer.sinceGenesis(new Date().toISOString());
+        })
+      }, 200);
+      Timer._interval = function() {
+        return interval;
+      }
+
+      Session.sessionObjectSerializerFor('timer')(Timer);
+    }
   }
 };
