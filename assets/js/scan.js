@@ -43,8 +43,8 @@ const UI = {
   },
 
   showDisplays: (toDisplay = []) => {
-    document.querySelector('.js-content')
-      .querySelectorAll('[data-display]')
+    // document.querySelector('.js-content')
+      document.querySelectorAll('[data-display]')
       .forEach(x => UI.setElHidden(x, true));
 
     toDisplay.forEach(sel => {

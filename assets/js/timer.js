@@ -51,6 +51,8 @@ let Timer = {
 
     Session.sessionObjectSerializerFor('timer')(Timer);
 
+    Timer.renderTable();
+
     return result;
   },
 
@@ -79,11 +81,35 @@ let Timer = {
       let sinceGenesis = this.between(laps['genesis'], timestamp);
       let sinceLast = key === 'genesis' ? undefined : this.between(lapsKey, timestamp);
       acc[key] = key === 'genesis' ? timestamp : {
+        lap: Number(key),
         timestamp: timestamp,
         display: Number(key) > 1 ? `${sinceGenesis} (+${sinceLast})` : sinceLast
       };
       return acc;
     }, {});
+  },
+
+  renderTableHtml: (laps = {}) => {
+    return [
+      `<table class="datatable" style="width:100%;">
+      <thead><tr><th>Lap</th><th>Time</th></tr></thead>`,
+      '<tbody>'
+    ].concat(Object.values(Timer.renderTimestamps(laps))
+                  .filter(r => r.lap && r.display)
+                  .sort((a, b) => {
+                    if (a.lap > b.lap) {
+                      return -1;
+                    }
+
+                    if (a.lap < b.lap) {
+                      return 1;
+                    }
+
+                    return 0;
+                  })
+                  .map(d => `<tr><td>${d.lap}</td><td>${d.display}</td></tr>`))
+     .concat(['</tbody>', '</table>'])
+     .join('\n');
   },
 
   resume: () => {
@@ -92,7 +118,7 @@ let Timer = {
     if (Timer.running && !Timer._interval) {
       let interval = setInterval(() => {
         window.requestAnimationFrame(() => {
-          document.querySelector('[data-timer-display]').innerText = Timer.sinceGenesis(new Date().toISOString());
+          [...document.querySelectorAll('[data-timer-display]')].forEach(el => el.innerText = Timer.sinceGenesis(new Date().toISOString()));
         })
       }, 200);
       Timer._interval = function() {
@@ -100,6 +126,12 @@ let Timer = {
       }
 
       Session.sessionObjectSerializerFor('timer')(Timer);
+
+      Timer.renderTable();
     }
+  },
+
+  renderTable: () => {
+    document.querySelector('.js-stopwatch-laps').innerHTML = Timer.renderTableHtml(Timer.laps);
   }
 };

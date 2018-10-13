@@ -83,6 +83,12 @@ select {
   width: 100%;
 }
 
+
+.instruction-bar {
+  padding: 1em;
+  background-color: #eee;
+}
+
 .title {
   padding: 0.5em;
   display: block;
@@ -184,11 +190,6 @@ th {
   background-color: #000000d6;
 }
 
-.js-instruction {
-  padding: 1em;
-  background-color: #eee;
-}
-
 .js-manual-form {
 
 }
@@ -227,4 +228,16 @@ th {
 
 .background-light-green {
   background-color: #e2fff0;
+}
+
+.stopwatch-main-text {
+  font-weight: bold;
+  font-size: 30pt;
+  text-align: center;
+  width: 100%;
+  flex:1;
+}
+
+.center {
+  text-align: center;
 }
