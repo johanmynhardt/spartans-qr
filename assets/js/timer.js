@@ -5,8 +5,11 @@ let Timer = {
   _interval: undefined,
 
   start: function() {
-    if (!this.laps.genesis) {
-      Timer.laps.genesis = new Date().toISOString();
+    if (!this.laps.genesis || !Timer.running) {
+      if (!Timer.laps.genesis) {
+        Timer.laps.genesis = new Date().toISOString();
+      }
+
       Timer.running = true;
       let interval = setInterval(() => {
         window.requestAnimationFrame(() => {
@@ -18,8 +21,15 @@ let Timer = {
       }
 
       Session.sessionObjectSerializerFor('timer')(Timer);
+      Timer.renderTable();
     }
     return Timer.laps.genesis;
+  },
+
+  stop: () => {
+    clearInterval(Timer._interval());
+    Timer.running = false;
+    Session.sessionObjectSerializerFor('timer')(Timer);
   },
 
   last: function() {
