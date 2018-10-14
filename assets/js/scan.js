@@ -1,4 +1,10 @@
 const UI = {
+  scene: {
+    scanner: ['.js-scanner-actions', '.js-data', '.js-preview'],
+    timer: ['.js-stopwatch', '.js-stopwatch-actions', '.js-stopwatch-laps'],
+    qrgenerate: ['.js-qr-generate']
+  },
+
   setHidden: (selector, trueOrFalse) => {
     let el = document.querySelector(selector);
     if (trueOrFalse) {

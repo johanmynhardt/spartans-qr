@@ -65,7 +65,7 @@
       <ul>
         <li><i class="fas fa-database"></i> <strong>Data</strong></li>
 
-        <li><button onclick="dd.tabulateData(); UI.toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
+        <li><button onclick="dd.tabulateData(); UI.showDisplays(UI.scene.scanner); UI.toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
         <li><button onclick="store.exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></li>
         <li hidden data-migrate><button onclick="store.migrate()"><i class="fas fa-directions"></i> Migrate</button></li>
         <li><button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge</button></li>
@@ -74,7 +74,7 @@
       <ul>
         <li><i class="fas fa-chess-board"></i> <strong>QR</strong></li>
 
-        <li><button onclick="UI.toggleNav(event); UI.showDisplays(['.js-qr-generate']); QR.makeCode(qrinput.value, {qrid:'qr-generate'});"><i class="fas fa-cog"></i> Generate</button>
+        <li><button onclick="UI.toggleNav(event); UI.showDisplays(UI.scene.qrgenerate); QR.makeCode(qrinput.value, {qrid:'qr-generate'});"><i class="fas fa-cog"></i> Generate</button>
       </ul>
     </div>
   </nav>
@@ -134,7 +134,7 @@
       </div>
 
       <div class="js-qr-generate with-margin" hidden data-display>
-        <h3 class="row">QR:Generate <span class="grow"></span> <a onclick="UI.showDisplays(['.js-preview', '.js-data']);"><i class="fas fa-times-circle"></i></a></h3>
+        <h3 class="row">QR:Generate <span class="grow"></span> <a onclick="UI.showDisplays(UI.scene.scanner);"><i class="fas fa-times-circle"></i></a></h3>
         <div id="qr-generate" class="with-margin">
         </div>
         <input id="qrinput" class="with-margin" oninput="QR.makeCode(this.value, {qrid: 'qr-generate'})" />
@@ -157,7 +157,7 @@
         <div class="row">
           <button onclick="scanState.reset(); scanState.render();" class="js-scan-discard"><i class="fas fa-trash"></i></button>
           <span class="grow"></span>
-          <button onclick="scanState.reset(); scanState.render(); UI.showDisplays(['.js-data', '.js-preview']); this.setAttribute('hidden', true);"
+          <button onclick="scanState.reset(); scanState.render(); UI.showDisplays(UI.scene.scanner); this.setAttribute('hidden', true);"
               class="js-scan-ok primary" hidden><i class="fas fa-save"></i> OK</button>
         </div>
       </div>
@@ -170,48 +170,60 @@
 
     </div>
 
-    <!-- STOPWATCH ACTIONS -->
-    <div class="js-stopwatch-actions" hidden data-display>
-      <div class="row">
-        <button onclick="Timer.start();">Timer</button>
-        <button onclick="Timer.stop();"><i class="fas fa-stop"></i></button>
-        <span class="flex"></span>
-        <button onclick="log(Timer.lap().display);">Lap</button>
-      </div>
-    </div>
-
     <!-- INSTRUCTION BAR  -->
     <div class="js-instruction instruction-bar">
       <i class="fas fa-info"></i> Loading...
     </div>
 
+    <!-- STOPWATCH ACTIONS -->
+    <div class="js-stopwatch-actions" hidden data-display>
+      <div class="row">
+        <button onclick="Timer.start();">&nbsp;<i class="fas fa-play-circle"></i>&nbsp;</button>
+        <button onclick="Timer.stop();">&nbsp;<i class="fas fa-stop"></i>&nbsp;</button>
+        <span class="flex"></span>
+        <button onclick="log(Timer.lap().display);"><i class="fas fa-plus">&nbsp;</i>Lap</button>
+      </div>
+    </div>
+
+    <!-- SCANNER ACTIONS -->
+    <div class="js-scanner-actions" hidden data-display>
+      <div class="row">
+        <button class="js-button-scan primary" onclick="optics.scan();">
+          <i class="fas fa-expand"></i>
+        </button>
+
+        <button class="js-button-stop-scan primary" onclick="optics.stopScan();" hidden>
+          <i class="fas fa-stop"></i>
+        </button>
+
+
+        <span class="flex"></span>
+
+        <button onclick="UI.showManualForm();">
+          <i class="fas fa-user-plus"></i>
+        </button>
+      </div>
+    </div>
+
     <!--  ACTION BAR  -->
     <div class="action-bar">
       <div class="row">
-      <button class="js-button-scan primary" onclick="optics.scan();">
-        <i class="fas fa-expand"></i>
-      </button>
+        <button onclick="UI.showDisplays(UI.scene.scanner); instruction('Scan user or sequence token.')">
+          <i class="fas fa-vector-square"></i>
+        </button>
 
-      <button class="js-button-stop-scan primary" onclick="optics.stopScan();" hidden>
-        <i class="fas fa-stop"></i>
-      </button>
+        <button onclick="UI.showDisplays(UI.scene.timer); Timer.renderTable(); instruction('Capture laps')">
+          <i class="fas fa-stopwatch"></i>
+        </button>
 
-      <button>
-        <i class="fas fa-stopwatch" onclick="UI.showDisplays(['.js-stopwatch', '.js-stopwatch-actions', '.js-stopwatch-laps']); Timer.renderTable();"></i>
-      </button>
+        <span class="flex"></span>
 
-            <span class="flex"></span>
+        <button onclick="dd.clearLog();">
+          <i class="fas fa-eraser"></i>
+        </button>
 
-            <span class="flex"></span>
 
-      <button onclick="dd.clearLog();">
-        <i class="fas fa-eraser"></i>
-      </button>
-
-      <button onclick="UI.showManualForm();">
-        <i class="fas fa-user-plus"></i>
-      </button>
-    </div>
+      </div>
     </div>
     <!-- END -->
   </div>
