@@ -142,7 +142,6 @@ const store = {
       type: type
     });
     let link = document.createElement('a');
-    link.download = "data.json";
     link.href = window.URL.createObjectURL(blob);
     link.download = new URL(new URL(link.href).pathname).pathname.substr(1) +
       ((t) => (({
