@@ -55,13 +55,17 @@ let Timer = {
       display: [nextIdx, nextIdx === 1 ? sinceLast : `${sinceGenesis} (+${sinceLast})`].join(' ')
     };
 
+    const result2 = Object.assign({}, result, {
+      display: [nextIdx === 1 ? sinceLast : `${sinceGenesis} (+${sinceLast})`].join(' ')
+    });
+
     this.laps[nextIdx] = timestamp;
 
     Journal.capture('timer.lap', result);
 
     Session.sessionObjectSerializerFor('timer')(Timer);
 
-    Timer.renderTable();
+    Timer.appendLapHtml(Object.assign({}, result2, {lap: result2.seq}));
 
     return result;
   },
@@ -99,9 +103,17 @@ let Timer = {
     }, {});
   },
 
+  appendLapHtml: (d) => {
+    console.info('got d to insert: ', d);
+    let tbody = document.querySelector('table.js-laps-table > tbody');
+    let tr = document.createElement('tr');
+    tr.innerHTML = `<td>${d.lap}</td><td>${d.display}</td>`;
+    tbody.insertBefore(tr, tbody.firstElementChild);
+  },
+
   renderTableHtml: (laps = {}) => {
     return [
-      `<table class="datatable" style="width:100%;">
+      `<table class="datatable js-laps-table" style="width:100%;">
       <thead><tr><th>Lap</th><th>Time</th></tr></thead>`,
       '<tbody>'
     ].concat(Object.values(Timer.renderTimestamps(laps))
@@ -142,6 +154,9 @@ let Timer = {
   },
 
   renderTable: () => {
-    document.querySelector('.js-stopwatch-laps').innerHTML = Timer.renderTableHtml(Timer.laps);
+    window.requestAnimationFrame(() => {
+      document.querySelector('.js-stopwatch-laps').innerHTML = Timer.renderTableHtml(Timer.laps);
+    })
+
   }
 };

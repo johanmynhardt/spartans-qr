@@ -66,7 +66,9 @@
         <li><i class="fas fa-database"></i> <strong>Data</strong></li>
 
         <li><button onclick="dd.tabulateData(); UI.showDisplays(UI.scene.scanner); UI.toggleNav(event);"><i class="fas fa-list-alt"></i> list</button></li>
-        <li><button onclick="store.exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button></li>
+        <li><button onclick="store.exportCSV()"><i class="fas fa-file-export"></i> Export Scan Data (CSV)</button></li>
+        <li><button onclick="store.exportLapCSV()"><i class="fas fa-file-export"></i> Export Lap Data (CSV)</button></li>
+        <li><button onclick="store.exportStore()"><i class="fas fa-file-export"></i> Export Everything (JSON)</button></li>
         <li hidden data-migrate><button onclick="store.migrate()"><i class="fas fa-directions"></i> Migrate</button></li>
         <li><button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge</button></li>
       </ul>

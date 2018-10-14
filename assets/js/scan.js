@@ -76,7 +76,7 @@ const store = {
     let session = store.currentSession();
     return {
       session: session,
-      scans: store.sessions()[session].scans
+      scans: Session.sessionArrayGetter('scans')
     };
   },
 
@@ -96,14 +96,21 @@ const store = {
     };
   },
 
+  translateToCsv: (collection) => {
+    if (!collection) {
+      return undefined;
+    }
+    return [Object.keys(collection[0]).join(',')]
+      .concat(collection.map(row => Object.values(row).join(',')))
+      .join('\n');
+  },
+
   asCSV: () => {
-    let scans = store.listScans().scans;
+    let scans = Session.sessionArrayGetter('scans');
     if (!scans) {
       return undefined;
     }
-    return [Object.keys(scans[0]).join(',')]
-      .concat(scans.map(row => Object.values(row).join(',')))
-      .join('\n');
+    return store.translateToCsv(scans);
   },
 
   asHTML: () => {
@@ -130,6 +137,21 @@ const store = {
     return buffer.join('\n');
   },
 
+  initiateDownload: (type, data) => {
+    let blob = new Blob([data], {
+      type: type
+    });
+    let link = document.createElement('a');
+    link.download = "data.json";
+    link.href = window.URL.createObjectURL(blob);
+    link.download = new URL(new URL(link.href).pathname).pathname.substr(1) +
+      ((t) => (({
+        ['application/json']: '.json',
+        ['text/csv']: '.csv'
+      })[t] || ''))(type);
+    link.click();
+  },
+
   exportCSV: () => {
     let csvData = store.asCSV();
     if (!csvData) {
@@ -138,12 +160,37 @@ const store = {
       return;
     }
 
-    let blob = new Blob([csvData], {
-      type: 'text/csv'
-    });
-    let link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.click();
+    store.initiateDownload('text/csv', csvData);
+  },
+
+  exportLapCSV: () => {
+    let lapData = Timer.renderTimestamps(Timer.laps);
+    let lapArr = Object.keys(lapData)
+                   .map(key => {
+                     return key === 'genesis' ?
+                      {
+                        lap: 0,
+                        timestamp: lapData[key],
+                        display: 'genesis'
+                      } : lapData[key];
+                   })
+                   .reduce((acc, next) => {
+                     acc.push(next);
+                     return acc;
+                   }, []);
+
+    let lapCsv = store.translateToCsv(lapArr);
+    store.initiateDownload('text/csv', lapCsv);
+  },
+
+  exportStore: () => {
+    let storeJson = {
+      journal: Session.sessionObjectGetter('journal'),
+      scans: Session.sessionObjectGetter('scans'),
+      timer: Session.sessionObjectGetter('timer')
+    };
+
+    store.initiateDownload('application/json', JSON.stringify(storeJson));
   },
 
   purge: () => {
