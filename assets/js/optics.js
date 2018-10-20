@@ -2,15 +2,28 @@ const Optics = {
   scanner: undefined,
   camera: undefined,
 
+  visibility: {
+    start: {
+      '.js-button-scan': true,
+      '.js-button-stop-scan': false,
+      'video': false
+    },
+    stop: {
+      '.js-button-scan': false,
+      '.js-button-stop-scan': true,
+      'video': true
+    }
+  },
+
   scan: () => {
     if (!document.querySelector('.js-manual-form').hidden) {
       ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
     }
     if (Optics.scanner && Optics.camera) {
       Optics.scanner.start(Optics.camera);
-      ['.js-button-scan', '.js-button-stop-scan']
-        .map(select => document.querySelector(select))
-        .forEach(UI.toggleHidden);
+      Object.entries(Optics.visibility.start).forEach(entry => {
+        UI.setHidden(entry[0], entry[1]);
+      });
     } else {
       alert('please select a camera!');
     }
@@ -19,8 +32,9 @@ const Optics = {
   stopScan: () => {
     if (Optics.scanner) {
       Optics.scanner.stop();
-      UI.setHidden('.js-button-scan', false);
-      UI.setHidden('.js-button-stop-scan', true);
+      Object.entries(Optics.visibility.stop).forEach(entry => {
+        UI.setHidden(entry[0], entry[1]);
+      });
     }
   },
 

@@ -1,4 +1,3 @@
-
 const log = (msg) => {
   console.log('got msg: ', msg);
   instruction(msg);
