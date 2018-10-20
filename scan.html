@@ -21,13 +21,20 @@
     <script type="text/javascript" src="lib/instascan.min.js"></script>
     <script type="text/javascript" src="lib/qrcode.min.js"></script>
     <script type="text/javascript" src="lib/moment.min.js"></script>
-    <script type="text/javascript" src="assets/js/toast.js"></script>
-    <script type="text/javascript" src="assets/js/qr.js"></script>
-    <script type="text/javascript" src="assets/js/timer.js"></script>
+
+    <!-- Dependencies: order matters -->
     <script type="text/javascript" src="assets/js/storage.js"></script>
     <script type="text/javascript" src="assets/js/session.js"></script>
+    <script type="text/javascript" src="assets/js/store.js"></script>
     <script type="text/javascript" src="assets/js/journal.js"></script>
+    <script type="text/javascript" src="assets/js/qr.js"></script>
+    <script type="text/javascript" src="assets/js/timer.js"></script>
+    <script type="text/javascript" src="assets/js/ui.js"></script>
+    <script type="text/javascript" src="assets/js/optics.js"></script>
+    <!-- Dependencies -->
+    <script type="text/javascript" src="assets/js/toast.js"></script>
 
+    <!-- APP ENTRY -->
     <script type="text/javascript" src="assets/js/scan.js"></script>
     <link href="assets/css/scan-style.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
@@ -67,25 +74,33 @@
             <li><i class="fas fa-database"></i> <strong>Data</strong></li>
 
             <li>
-                <button onclick="dd.tabulateData(); UI.showDisplays(UI.scene.scanner); UI.toggleNav(event);"><i
-                        class="fas fa-list-alt"></i> list
+                <button onclick="dd.tabulateData(); UI.showDisplays(UI.scene.scanner); UI.toggleNav(event);">
+                    <i class="fas fa-list-alt"></i> list
                 </button>
             </li>
             <li>
-                <button onclick="store.exportCSV()"><i class="fas fa-file-export"></i> Export Scan Data (CSV)</button>
+                <button onclick="Store.exportCSV()">
+                    <i class="fas fa-file-export"></i> Export Scan Data (CSV)
+                </button>
             </li>
             <li>
-                <button onclick="store.exportLapCSV()"><i class="fas fa-file-export"></i> Export Lap Data (CSV)</button>
+                <button onclick="Store.exportLapCSV()">
+                    <i class="fas fa-file-export"></i> Export Lap Data (CSV)
+                </button>
             </li>
             <li>
-                <button onclick="store.exportStore()"><i class="fas fa-file-export"></i> Export Everything (JSON)
+                <button onclick="Store.exportStore()">
+                    <i class="fas fa-file-export"></i> Export Everything (JSON)
                 </button>
             </li>
             <li hidden data-migrate>
-                <button onclick="store.migrate()"><i class="fas fa-directions"></i> Migrate</button>
+                <button onclick="Store.migrate()">
+                    <i class="fas fa-directions"></i> Migrate
+                </button>
             </li>
             <li>
-                <button onclick="dd.clearLog(); store.purge();" class="button-purge"><i class="fas fa-trash"></i> purge
+                <button onclick="dd.clearLog(); Store.purge();" class="button-purge">
+                    <i class="fas fa-trash"></i> purge
                 </button>
             </li>
         </ul>
@@ -109,9 +124,10 @@
     <div class="title-bar" onclick="UI.toggleNav(event);">
         <h3 class="with-margin">
         <span class="row">
-        <i class="fas fa-caret-square-down"></i>&nbsp; Spartans<span class="flex"></span><span
-                data-session-display></span>
-      </span>
+            <i class="fas fa-caret-square-down"></i>&nbsp; Spartans
+            <span class="flex"></span>
+            <span data-session-display></span>
+        </span>
         </h3>
     </div>
 
@@ -127,8 +143,8 @@
     <!-- MAIN CONTENT  -->
     <div class="js-content content">
 
-        <div class="js-stopwatch-laps" hidden data-display>
-        </div>
+        <div class="js-stopwatch-laps" hidden data-display></div>
+
         <div class="js-manual-form with-margin" hidden data-display>
             <h3>Manual Entry</h3>
 
@@ -146,9 +162,9 @@
             </div>
 
             <div class="row">
-                <button onclick="store.discardManualEntry();"><i class="fas fa-trash"></i></button>
+                <button onclick="Store.discardManualEntry();"><i class="fas fa-trash"></i></button>
                 <span class="grow"></span>
-                <button onclick="store.commitManualEntry();" class="primary"><i class="fas fa-save"></i> Save</button>
+                <button onclick="Store.commitManualEntry();" class="primary"><i class="fas fa-save"></i> Save</button>
             </div>
         </div>
 
@@ -157,10 +173,12 @@
         </div>
 
         <div class="js-qr-generate with-margin" hidden data-display>
-            <h3 class="row">QR:Generate <span class="grow"></span> <a onclick="UI.showDisplays(UI.scene.scanner);"><i
-                    class="fas fa-times-circle"></i></a></h3>
-            <div id="qr-generate" class="with-margin">
-            </div>
+            <h3 class="row">
+                QR:Generate <span class="grow"></span>
+                <a onclick="UI.showDisplays(UI.scene.scanner);"><i class="fas fa-times-circle"></i></a>
+            </h3>
+            <div id="qr-generate" class="with-margin"></div>
+
             <input id="qrinput" class="with-margin" oninput="QR.makeCode(this.value, {qrid: 'qr-generate'})"/>
         </div>
 
@@ -179,11 +197,13 @@
                 </div>
             </div>
             <div class="row">
-                <button onclick="scanState.reset(); scanState.render();" class="js-scan-discard"><i
-                        class="fas fa-trash"></i></button>
+                <button onclick="scanState.reset(); scanState.render();" class="js-scan-discard">
+                    <i class="fas fa-trash"></i>
+                </button>
                 <span class="grow"></span>
                 <button onclick="scanState.reset(); scanState.render(); UI.showDisplays(UI.scene.scanner); this.setAttribute('hidden', true);"
-                        class="js-scan-ok primary" hidden><i class="fas fa-save"></i> OK
+                        class="js-scan-ok primary" hidden>
+                    <i class="fas fa-save"></i> OK
                 </button>
             </div>
         </div>
@@ -212,11 +232,11 @@
     <!-- SCANNER ACTIONS -->
     <div class="js-scanner-actions" hidden data-display>
         <div class="row">
-            <button class="js-button-scan primary" onclick="optics.scan();">
+            <button class="js-button-scan primary" onclick="Optics.scan();">
                 <i class="fas fa-expand"></i>
             </button>
 
-            <button class="js-button-stop-scan primary" onclick="optics.stopScan();" hidden>
+            <button class="js-button-stop-scan primary" onclick="Optics.stopScan();" hidden>
                 <i class="fas fa-stop"></i>
             </button>
 
