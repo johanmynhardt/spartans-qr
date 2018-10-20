@@ -4,7 +4,7 @@ let Timer = {
   _format: 'HH:mm:ss:SSS',
   _interval: undefined,
 
-  start: function() {
+  start: function () {
     if (!this.laps.genesis || !Timer.running) {
       if (!Timer.laps.genesis) {
         Timer.laps.genesis = new Date().toISOString();
@@ -16,9 +16,9 @@ let Timer = {
           document.querySelector('[data-timer-display]').innerText = this.sinceGenesis(new Date().toISOString());
         })
       }, 200);
-      Timer._interval = function() {
+      Timer._interval = function () {
         return interval;
-      }
+      };
 
       Session.sessionObjectSerializerFor('timer')(Timer);
       Timer.renderTable();
@@ -32,16 +32,16 @@ let Timer = {
     Session.sessionObjectSerializerFor('timer')(Timer);
   },
 
-  last: function() {
+  last: function () {
     return this._seq;
   },
 
-  next: function() {
+  next: function () {
     this._seq = this.last() + 1;
     return this.last();
   },
 
-  lap: function() {
+  lap: function () {
     const timestamp = new Date().toISOString();
     const sinceGenesis = this.sinceGenesis(timestamp);
     const sinceLast = this._seq === 0 ? sinceGenesis : this.sinceLastLap(timestamp);
@@ -70,24 +70,24 @@ let Timer = {
     return result;
   },
 
-  reset: function() {
+  reset: function () {
     this._seq = 0;
     this.laps = {};
   },
 
-  between: function(first, second) {
+  between: function (first, second) {
     return moment(moment(second).diff(moment(first))).utc().format(Timer._format);
   },
 
-  sinceGenesis: function(now) {
+  sinceGenesis: function (now) {
     return this.between(Timer.laps.genesis, now);
   },
 
-  sinceLastLap: function(now) {
+  sinceLastLap: function (now) {
     return this.between(this.laps[this.last()], now);
   },
 
-  renderTimestamps: function(laps = {}) {
+  renderTimestamps: function (laps = {}) {
     return Object.keys(laps).reduce((acc, key) => {
       let timestamp = laps[key];
       let lapsKey = laps[key === '1' ? 'genesis' : Number(key) - 1];
@@ -113,25 +113,25 @@ let Timer = {
 
   renderTableHtml: (laps = {}) => {
     return [
-      `<table class="datatable js-laps-table" style="width:100%;">
-      <thead><tr><th>Lap</th><th>Time</th></tr></thead>`,
+      '<table class="datatable js-laps-table" style="width:100%;">',
+      '<thead><tr><th>Lap</th><th>Time</th></tr></thead>',
       '<tbody>'
     ].concat(Object.values(Timer.renderTimestamps(laps))
-                  .filter(r => r.lap && r.display)
-                  .sort((a, b) => {
-                    if (a.lap > b.lap) {
-                      return -1;
-                    }
+      .filter(r => r.lap && r.display)
+      .sort((a, b) => {
+        if (a.lap > b.lap) {
+          return -1;
+        }
 
-                    if (a.lap < b.lap) {
-                      return 1;
-                    }
+        if (a.lap < b.lap) {
+          return 1;
+        }
 
-                    return 0;
-                  })
-                  .map(d => `<tr><td>${d.lap}</td><td>${d.display}</td></tr>`))
-     .concat(['</tbody>', '</table>'])
-     .join('\n');
+        return 0;
+      })
+      .map(d => `<tr><td>${d.lap}</td><td>${d.display}</td></tr>`))
+      .concat(['</tbody>', '</table>'])
+      .join('\n');
   },
 
   resume: () => {
@@ -143,9 +143,9 @@ let Timer = {
           [...document.querySelectorAll('[data-timer-display]')].forEach(el => el.innerText = Timer.sinceGenesis(new Date().toISOString()));
         })
       }, 200);
-      Timer._interval = function() {
+      Timer._interval = function () {
         return interval;
-      }
+      };
 
       Session.sessionObjectSerializerFor('timer')(Timer);
 

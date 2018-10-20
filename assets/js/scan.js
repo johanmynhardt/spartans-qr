@@ -50,7 +50,7 @@ const UI = {
 
   showDisplays: (toDisplay = []) => {
     // document.querySelector('.js-content')
-      document.querySelectorAll('[data-display]')
+    document.querySelectorAll('[data-display]')
       .forEach(x => UI.setElHidden(x, true));
 
     toDisplay.forEach(sel => {
@@ -165,18 +165,18 @@ const store = {
   exportLapCSV: () => {
     let lapData = Timer.renderTimestamps(Timer.laps);
     let lapArr = Object.keys(lapData)
-                   .map(key => {
-                     return key === 'genesis' ?
-                      {
-                        lap: 0,
-                        timestamp: lapData[key],
-                        display: 'genesis'
-                      } : lapData[key];
-                   })
-                   .reduce((acc, next) => {
-                     acc.push(next);
-                     return acc;
-                   }, []);
+      .map(key => {
+        return key === 'genesis' ?
+          {
+            lap: 0,
+            timestamp: lapData[key],
+            display: 'genesis'
+          } : lapData[key];
+      })
+      .reduce((acc, next) => {
+        acc.push(next);
+        return acc;
+      }, []);
 
     let lapCsv = store.translateToCsv(lapArr);
     store.initiateDownload('text/csv', lapCsv);
@@ -231,7 +231,7 @@ const log = (msg) => {
   instruction(msg);
   let loge = document.querySelector('#log');
   loge.innerHTML = msg + "\n" + loge.innerHTML;
-}
+};
 
 const instruction = msg => {
   let instruction = document.querySelector('.js-instruction');
@@ -246,7 +246,7 @@ const dd = {
 
   clearLog: () => {
     [dd.props.logselector, dd.props.tableselector]
-    .forEach(select => document.querySelector(select).innerHTML = '');
+      .forEach(select => document.querySelector(select).innerHTML = '');
   },
 
   tabulateData: () => {
@@ -267,7 +267,7 @@ const optics = {
     if (optics.scanner && optics.camera) {
       optics.scanner.start(optics.camera);
       ['.js-button-scan', '.js-button-stop-scan']
-      .map(select => document.querySelector(select))
+        .map(select => document.querySelector(select))
         .forEach(UI.toggleHidden);
     } else {
       alert('please select a camera!');
@@ -284,7 +284,7 @@ const optics = {
 
   selectCamera: (targetCamera) => {
     Instascan.Camera.getCameras()
-      .then(function(cameras) {
+      .then(function (cameras) {
         let camToUse = cameras.filter(cam => cam.id === targetCamera)[0];
         optics.camera = camToUse;
         if (camToUse) {
@@ -293,9 +293,9 @@ const optics = {
         } else {
           alert('No usable camera found.');
         }
-      }).catch(function(e) {
-        log(`error: ${e}`);
-      });
+      }).catch(function (e) {
+      log(`error: ${e}`);
+    });
   }
 };
 
@@ -317,8 +317,8 @@ const scanState = {
   },
 
   render: () => {
-      document.querySelector('.js-scan-name').value = scanState.name;
-      document.querySelector('.js-scan-seq').value = scanState.seq;
+    document.querySelector('.js-scan-name').value = scanState.name;
+    document.querySelector('.js-scan-seq').value = scanState.seq;
   },
 
   capture: () => {
@@ -346,25 +346,25 @@ const scanState = {
       .map(h => [h.name, h.fn(content)])
       .filter(x => x);
 
-      if (scanResult.length === 0) {
-        Journal.capture('onScan.no-scan-result', content);
+    if (scanResult.length === 0) {
+      Journal.capture('onScan.no-scan-result', content);
 
-        let colAct = {
-          ['background-light-red']: 'add',
-          ['background-light-green']: 'remove'
-        }
+      let colAct = {
+        ['background-light-red']: 'add',
+        ['background-light-green']: 'remove'
+      };
 
-        Object.keys(colAct).forEach(key => {
-          document.querySelector('.js-scan-started').classList[colAct[key]](key)
-        });
+      Object.keys(colAct).forEach(key => {
+        document.querySelector('.js-scan-started').classList[colAct[key]](key)
+      });
 
-        UI.showDisplays(['.js-scan-started', '.js-preview']);
+      UI.showDisplays(['.js-scan-started', '.js-preview']);
 
-        //document.querySelector('.js-scan-started').classList.add('background-light-red');
-        log(`No scan result! Got: ${content}`);
-      } else {
-        log(scanResult);
-      }
+      //document.querySelector('.js-scan-started').classList.add('background-light-red');
+      log(`No scan result! Got: ${content}`);
+    } else {
+      log(scanResult);
+    }
 
     if (scanState.complete()) {
       scanState.render();
@@ -379,33 +379,33 @@ const scanState = {
     }
 
     if (scanState.started()) {
-      UI.showDisplays(['.js-preview', '.js-scan-started'])
+      UI.showDisplays(['.js-preview', '.js-scan-started']);
       scanState.render();
     }
   },
 
   handlers: [{
-      name: 'Set Session',
-      test: function(x = '') {
-        return x.match(/\[cmd:session:(\d{4}-\d{2}-\d{2})\]/);
-      },
-      fn: function(content) {
-        let result = this.test(content);
-        if (result[1]) {
-          store.saveSessionId(result[1]);
-          instruction(`session set from scan: ${result[1]}`);
-          return true;
-        }
-        return false;
-      }
+    name: 'Set Session',
+    test: function (x = '') {
+      return x.match(/\[cmd:session:(\d{4}-\d{2}-\d{2})\]/);
     },
+    fn: function (content) {
+      let result = this.test(content);
+      if (result[1]) {
+        store.saveSessionId(result[1]);
+        instruction(`session set from scan: ${result[1]}`);
+        return true;
+      }
+      return false;
+    }
+  },
 
     {
       name: 'Capture user token',
-      test: function(x = '') {
+      test: function (x = '') {
         return x.match(/^([\w\ ]+){1}:(.+){1}$/);
       },
-      fn: function(content) {
+      fn: function (content) {
         let result = this.test(content);
         if (result[1] && result[2]) {
           scanState.id = result[2];
@@ -418,10 +418,10 @@ const scanState = {
 
     {
       name: 'Capture sequence token',
-      test: function(x = '') {
+      test: function (x = '') {
         return x.match(/^(\d+)$/);
       },
-      fn: function(content) {
+      fn: function (content) {
         let result = this.test(content);
         if (result[1]) {
           scanState.seq = Number(result[1]);
@@ -433,10 +433,10 @@ const scanState = {
 
     {
       name: 'Toast',
-      test: function(x = '') {
+      test: function (x = '') {
         return x.match(/\[cmd:toast:(.+)\]/);
       },
-      fn: function(content) {
+      fn: function (content) {
         let result = this.test(content);
         console.info('toast result: ', result);
         if (result[1]) {
@@ -449,10 +449,10 @@ const scanState = {
 
     {
       name: 'Lap: ping',
-      test: function(x = '') {
+      test: function (x = '') {
         return x.match(/\[cmd:lap:ping\]/);
       },
-      fn: function(content) {
+      fn: function (content) {
         if (this.test(content)) {
           // capture lap timestamp
           return true;
@@ -461,8 +461,7 @@ const scanState = {
       }
     }
   ]
-}
-
+};
 
 
 window.addEventListener('load', () => {

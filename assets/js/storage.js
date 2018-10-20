@@ -9,7 +9,7 @@ const Storage = {
 
   appendToArray: (key, data) => {
     let arr = Storage.unserialize(key, '[]');
-    arr.push(data);;
+    arr.push(data);
     Storage.serialize(key, arr);
   }
 };
