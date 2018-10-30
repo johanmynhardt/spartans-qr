@@ -88,7 +88,7 @@ const scanState = {
         document.querySelector('.js-scan-started').classList[colAct[key]](key)
       });
 
-      UI.showDisplays(['.js-scan-started', '.js-preview']);
+      UI.showDisplays(UI.scene.scanStarted);
 
       //document.querySelector('.js-scan-started').classList.add('background-light-red');
       log(`No scan result! Got: ${content}`);
@@ -109,7 +109,7 @@ const scanState = {
     }
 
     if (scanState.started()) {
-      UI.showDisplays(['.js-preview', '.js-scan-started']);
+      UI.showDisplays(UI.scene.scanStarted);
       scanState.render();
     }
   },

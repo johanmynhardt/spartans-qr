@@ -1,6 +1,7 @@
 const UI = {
   scene: {
     scanner: ['.js-scanner-actions', '.js-data', '.js-preview'],
+    scanStarted: ['.js-scan-started', '.js-preview', '.js-scanner-actions'],
     timer: ['.js-stopwatch', '.js-stopwatch-actions', '.js-stopwatch-laps'],
     qrgenerate: ['.js-qr-generate']
   },
