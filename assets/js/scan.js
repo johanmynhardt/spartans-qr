@@ -133,10 +133,13 @@ const scanState = {
     {
       name: 'Capture user token',
       test: function (x = '') {
-        return x.match(/^([\w\ ]+){1}:(.+){1}$/);
+        return x.match(/^([\w\ \-'`]+){1}:(.+){1}$/);
       },
       fn: function (content) {
         let result = this.test(content);
+        // if (!result) {
+        //   console.warn('failed to test content: ', content);
+        // }
         if (result[1] && result[2]) {
           scanState.id = result[2];
           scanState.name = result[1];
