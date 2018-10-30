@@ -120,7 +120,7 @@
     <button class="no-print" onclick="showUserForm(true);">Add Person</button>
     <button class="no-print" onclick="showCSVForm(true);">Add from CSV</button>
 
-    <div data-dialog-csv class="dialog no-print">
+    <div data-dialog-csv hidden class="dialog no-print">
         <h3>Add from CSV</h3>
 
         <p>Paste cells from Google Sheets here and click Submit.</p>
@@ -314,13 +314,14 @@
     addUser(name, gender, member_no, discipline);
   };
 
-  let users = [/*{
+  let users = [{
           name: 'Johan Mynhardt',
           gender: 'Male',
           member_no: '239987',
           discipline: 'Running'
-        }*/];
+        }];
   users.forEach(makeCard);
+  updateUsers();
 </script>
 
 </body>
