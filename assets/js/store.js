@@ -128,7 +128,7 @@ const Store = {
 
   discardManualEntry: () => {
     let manualForm = document.querySelector('.js-manual-form');
-    UI.showDisplays(['.js-preview', '.js-data']);
+    UI.showDisplays(UI.scene.scanner);
     manualForm.querySelector('[name=name]').value = null;
     manualForm.querySelector('[name=id]').value = null;
     return null;
@@ -139,10 +139,7 @@ const Store = {
     let name = manualForm.querySelector('[name=name]');
     let id = manualForm.querySelector('[name=id]');
 
-    let content = [name.value, id.value].join(':');
-    scanState.onScan(content);
-
-    ['.js-manual-form', '.js-preview'].forEach(UI.toggleBySelector);
+    scanState.onScan([name.value, id.value].join(':'));
 
     name.value = null;
     id.value = null;

@@ -44,11 +44,13 @@ const scanState = {
     scanState.seq = null;
     scanState.id = null;
     scanState.name = null;
+    document.querySelector('.js-scan-started').classList.remove('background-light-red');
   },
 
   render: () => {
-    document.querySelector('.js-scan-name').value = scanState.name;
-    document.querySelector('.js-scan-seq').value = scanState.seq;
+    [...document.querySelectorAll('.js-scan-name')].forEach(e => e.value = scanState.name);
+    [...document.querySelectorAll('.js-scan-id')].forEach(e => e.value = scanState.id);
+    [...document.querySelectorAll('.js-scan-seq')].forEach(e => e.value = scanState.seq);
   },
 
   capture: () => {
@@ -100,12 +102,11 @@ const scanState = {
       scanState.render();
       // capture scan
       scanState.capture();
-      document.querySelector('.js-scan-ok').removeAttribute('hidden');
-      document.querySelector('.js-scan-started').classList.add('background-light-green');
+      UI.showDisplays(UI.scene.scanComplete);
       let msg = `Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`;
-      instruction(msg);
-      Toast.show(msg);
 
+      document.querySelector('.js-scan-started').classList.remove('background-light-red');
+      instruction(msg);
     }
 
     if (scanState.started()) {

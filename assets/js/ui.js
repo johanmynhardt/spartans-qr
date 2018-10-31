@@ -2,8 +2,10 @@ const UI = {
   scene: {
     scanner: ['.js-scanner-actions', '.js-data', '.js-preview'],
     scanStarted: ['.js-scan-started', '.js-preview', '.js-scanner-actions'],
+    scanComplete: ['.js-scan-complete', '.js-scanner-actions'],
     timer: ['.js-stopwatch', '.js-stopwatch-actions', '.js-stopwatch-laps'],
-    qrgenerate: ['.js-qr-generate']
+    qrgenerate: ['.js-qr-generate'],
+    manualForm: ['.js-manual-form']
   },
 
   setHidden: (selector, trueOrFalse) => {
@@ -45,12 +47,11 @@ const UI = {
 
   showManualForm: () => {
     Optics.stopScan();
-    UI.showDisplays(['.js-manual-form']);
+    UI.showDisplays(UI.scene.manualForm);
     return null;
   },
 
   showDisplays: (toDisplay = []) => {
-    // document.querySelector('.js-content')
     document.querySelectorAll('[data-display]')
       .forEach(x => UI.setElHidden(x, true));
 
