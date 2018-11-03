@@ -23,6 +23,8 @@ let Timer = {
       Session.sessionObjectSerializerFor('timer')(Timer);
       Timer.renderTable();
     }
+    document.dispatchEvent(new CustomEvent('doSpeak', {detail: 'Off you go! GO GO GO!'}));
+    navigator.vibrate(400);
     return Timer.laps.genesis;
   },
 
@@ -67,6 +69,8 @@ let Timer = {
 
     Timer.appendLapHtml(Object.assign({}, result2, {lap: result2.seq}));
 
+    document.dispatchEvent(new CustomEvent('doSpeak', {detail: `Lap ${result2.seq}`}));
+    navigator.vibrate(200);
     return result;
   },
 

@@ -1,8 +1,14 @@
-const log = (msg) => {
+const log = (msg, isError = false) => {
   console.log('got msg: ', msg);
   instruction(msg);
-  let loge = document.querySelector('#log');
-  loge.innerHTML = msg + "\n" + loge.innerHTML;
+
+  let pre = document.createElement('pre');
+  if (isError) {
+    pre.classList.add('error');
+  }
+  pre.innerText = msg;
+
+  document.querySelector('#log').appendChild(pre)
 };
 
 const instruction = msg => {
@@ -73,6 +79,8 @@ const scanState = {
     Optics.stopScan();
     Journal.capture('onScan.content', content);
 
+    navigator.vibrate(50);
+
     let scanResult = scanState.handlers
       .filter(h => h.test(content))
       .map(h => [h.name, h.fn(content)])
@@ -92,9 +100,11 @@ const scanState = {
 
       UI.showDisplays(UI.scene.scanStarted);
 
-      //document.querySelector('.js-scan-started').classList.add('background-light-red');
-      log(`No scan result! Got: ${content}`);
+      log(`No scan result! Got: ${content}`, true);
+      document.dispatchEvent(new CustomEvent('doSpeak', {detail: `Oh dear! Issue capturing input: ${content}`}));
+      navigator.vibrate([100, 50, 100, 50, 100]);
     } else {
+      document.querySelector('.js-scan-started').classList.remove('background-light-red');
       log(scanResult);
     }
 
@@ -103,10 +113,14 @@ const scanState = {
       // capture scan
       scanState.capture();
       UI.showDisplays(UI.scene.scanComplete);
+
+      document.dispatchEvent(new CustomEvent('doSpeak', {detail: `Just captured: ${scanState.lastScan}`}))
+
       let msg = `Just captured: ${scanState.lastScan}\nNext: Scan user or sequence token.`;
 
       document.querySelector('.js-scan-started').classList.remove('background-light-red');
       instruction(msg);
+      navigator.vibrate(400);
     }
 
     if (scanState.started()) {
@@ -249,4 +263,11 @@ window.addEventListener('load', () => {
   });
 
   Timer.resume();
+  setTimeout(() => window.speechSynthesis.speak(new SpeechSynthesisUtterance("Tie your laces and get set!")), 1000)
+});
+
+document.addEventListener('doSpeak', e => {
+  if (e.detail) {
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(e.detail));
+  }
 });

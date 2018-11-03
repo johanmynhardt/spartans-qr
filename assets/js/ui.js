@@ -1,8 +1,8 @@
 const UI = {
   scene: {
-    scanner: ['.js-scanner-actions', '.js-data', '.js-preview'],
-    scanStarted: ['.js-scan-started', '.js-preview', '.js-scanner-actions'],
-    scanComplete: ['.js-scan-complete', '.js-scanner-actions'],
+    scanner: ['.js-scanner-actions', '.js-data', '.js-preview', '.js-instruction'],
+    scanStarted: ['.js-scan-started', '.js-preview', '.js-scanner-actions', '.js-instruction'],
+    scanComplete: ['.js-scan-complete', '.js-instruction'],
     timer: ['.js-stopwatch', '.js-stopwatch-actions', '.js-stopwatch-laps'],
     qrgenerate: ['.js-qr-generate'],
     manualForm: ['.js-manual-form']

@@ -37,8 +37,8 @@
     <!-- APP ENTRY -->
     <script type="text/javascript" src="assets/js/scan.js"></script>
     <link href="assets/css/scan-style.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
-          integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/fontawesome/5.3.1/css/all.css"/>
+    <link rel="webfont" href="assets/css/fontawesome/5.3.1/webfonts/fa-solid-900.woff2"/>
 </head>
 
 <body>
@@ -168,7 +168,7 @@
             </div>
         </div>
 
-        <div class="js-preview" style="text-align: center; margin: 1em;" data-display>
+        <div class="js-preview" style="text-align: center;" data-display>
             <video id="preview" hidden></video>
         </div>
 
@@ -217,36 +217,42 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col full-width">
-                    <label>ID</label>
-                    <input class="js-scan-id" type="text" name="sequence" readonly>
+                <div class="row">
+                    <div class="col half-width">
+                        <label>ID</label>
+                        <input class="js-scan-id half-width" type="text" name="sequence" readonly>
+                    </div>
+                    <div class="col half-width">
+                        <label>Sequence</label>
+                        <input class="js-scan-seq half-width" type="text" name="sequence" readonly>
+                    </div>
+                </div>
+                <div class="row">
+
                 </div>
             </div>
-            <div class="row">
-                <div class="col full-width">
-                    <label>Sequence</label>
-                    <input class="js-scan-seq" type="text" name="sequence" readonly>
-                </div>
+
+            <div class="row with-margin">
+                <span class="grow"></span>
+                <i class="fas fa-grin" style="color: lawngreen; font-size: 6em"></i>
+                <span class="grow"></span>
             </div>
-            <div class="row">
-                <span class="grow"></span>
-                <i class="fas fa-grin" style="color: lawngreen; font-size: 4em"></i>
-                <span class="grow"></span>
+            <div class="row full-width">
                 <button onclick="scanState.reset(); scanState.render(); UI.showDisplays(UI.scene.scanner);"
-                        class="js-scan-ok primary">
+                        class="js-scan-ok primary full-width">
                     <i class="fas fa-check"></i>
                 </button>
             </div>
         </div>
 
-        <div class="js-data with-margin" data-display>
-            <pre id="log"></pre>
+        <div class="js-data" data-display>
+            <div id="log"></div>
             <div class="js-datatable"></div>
         </div>
     </div>
 
     <!-- INSTRUCTION BAR  -->
-    <div class="js-instruction instruction-bar">
+    <div class="js-instruction instruction-bar" hidden data-display>
         <i class="fas fa-info"></i> Loading...
     </div>
 
@@ -290,6 +296,8 @@
             <button onclick="UI.showDisplays(UI.scene.timer); Timer.renderTable(); instruction('Capture laps')">
                 <i class="fas fa-stopwatch"></i>
             </button>
+
+            <!--<button id="scanbutton" onclick="navigator.vibrate([100, 50, 50])">xxx</button>-->
 
             <span class="flex"></span>
 

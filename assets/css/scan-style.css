@@ -218,6 +218,10 @@ th {
   width: 100%;
 }
 
+.half-width {
+  width: 50%;
+}
+
 .warning {
   color: #F00;
 }
@@ -246,4 +250,12 @@ th {
 
 .center {
   text-align: center;
+}
+
+.error {
+  color: red;
+}
+
+#log > pre {
+  margin: 0.2em;
 }
