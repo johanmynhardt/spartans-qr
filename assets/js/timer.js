@@ -1,7 +1,7 @@
 let Timer = {
   laps: {},
   _seq: 0,
-  _format: 'HH:mm:ss:SSS',
+  _format: 'HH:mm:ss.SSS',
   _interval: undefined,
 
   start: function () {
