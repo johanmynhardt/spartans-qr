@@ -11,6 +11,9 @@ let Timer = {
       }
 
       Timer.running = true;
+
+      UI.setHidden('.js-timer-start', Timer.running);
+      UI.setHidden('.js-timer-stop', !Timer.running);
       let interval = setInterval(() => {
         window.requestAnimationFrame(() => {
           document.querySelector('[data-timer-display]').innerText = this.sinceGenesis(new Date().toISOString());
@@ -31,6 +34,8 @@ let Timer = {
   stop: () => {
     clearInterval(Timer._interval());
     Timer.running = false;
+    UI.setHidden('.js-timer-start', Timer.running);
+    UI.setHidden('.js-timer-stop', !Timer.running);
     Session.sessionObjectSerializerFor('timer')(Timer);
   },
 
@@ -139,6 +144,7 @@ let Timer = {
   },
 
   resume: () => {
+    console.info('resuming timer...');
     Timer = Object.assign({}, Timer, Session.sessionObjectGetter('timer'));
 
     if (Timer.running && !Timer._interval) {
@@ -155,6 +161,10 @@ let Timer = {
 
       Timer.renderTable();
     }
+
+
+    UI.setHidden('.js-timer-start', Timer.running);
+    UI.setHidden('.js-timer-stop', !Timer.running);
   },
 
   renderTable: () => {
