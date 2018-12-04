@@ -12,8 +12,7 @@ let Timer = {
 
       Timer.running = true;
 
-      UI.setHidden('.js-timer-start', Timer.running);
-      UI.setHidden('.js-timer-stop', !Timer.running);
+      Timer.updateButtons();
       let interval = setInterval(() => {
         window.requestAnimationFrame(() => {
           document.querySelector('[data-timer-display]').innerText = this.sinceGenesis(new Date().toISOString());
@@ -34,8 +33,7 @@ let Timer = {
   stop: () => {
     clearInterval(Timer._interval());
     Timer.running = false;
-    UI.setHidden('.js-timer-start', Timer.running);
-    UI.setHidden('.js-timer-stop', !Timer.running);
+    Timer.updateButtons();
     Session.sessionObjectSerializerFor('timer')(Timer);
   },
 
@@ -163,8 +161,7 @@ let Timer = {
     }
 
 
-    UI.setHidden('.js-timer-start', Timer.running);
-    UI.setHidden('.js-timer-stop', !Timer.running);
+    Timer.updateButtons();
   },
 
   renderTable: () => {
@@ -172,5 +169,11 @@ let Timer = {
       document.querySelector('.js-stopwatch-laps').innerHTML = Timer.renderTableHtml(Timer.laps);
     })
 
+  },
+
+  updateButtons: () => {
+    UI.setHidden('.js-timer-start', Timer.running);
+    UI.setHidden('.js-timer-stop', !Timer.running);
+    UI.setHidden('.js-timer-lap', !Timer.running);
   }
 };
