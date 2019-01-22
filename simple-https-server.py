@@ -8,10 +8,14 @@
 
 import BaseHTTPServer, SimpleHTTPServer
 import ssl
+import os
 
 #server_ip = '192.168.11.59'
 #server_ip = '192.168.8.102'
-server_ip = '192.168.8.101'
+server_ip = os.getenv('SERVER_IP', '192.168.8.101')
+
+print("Using server address: %s" % server_ip)
+
 httpd = BaseHTTPServer.HTTPServer((server_ip, 4443), SimpleHTTPServer.SimpleHTTPRequestHandler)
 httpd.socket = ssl.wrap_socket (httpd.socket, certfile='./server.pem', server_side=True)
 httpd.serve_forever()
