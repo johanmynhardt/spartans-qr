@@ -262,13 +262,17 @@
     document.querySelector('[data-card-list]').innerText = '';
   };
 
-  const addUser = (name, gender, member_no, discipline) => {
-    users.push({
+  const addUserFromObj = userobj => users.push(userobj);
+
+  const userObj = (name, gender, member_no, discipline) => ({
       name: name,
       gender: gender,
       member_no: member_no,
       discipline: discipline
-    });
+  });
+
+  const addUser = (name, gender, member_no, discipline) => {
+    addUserFromObj(userObj(name, gender, member_no, discipline));
   };
 
   const updateUsers = () => {
@@ -336,6 +340,38 @@
         }*/];
   users.forEach(makeCard);
   updateUsers();
+
+  const handleHash = hash => {
+    if (hash && hash.indexOf("data:") > -1) {
+      let edata = hash.substr(hash.indexOf('data:') + 'data:'.length);
+        console.info("edata: ", edata);
+
+      let data = atob(edata).split('\t');
+      if (data.length === 4) {
+        console.info('data: ', data);
+        data = (d => ({name: d[0], gender: d[1], member_no: d[2], discipline: d[3]}))(data);
+        console.info('data: ', data);
+        addUserFromObj(data);
+        updateUsers();
+      } else {
+        console.warn('Expected 4 fields. Got ' + data.length);
+      }
+    }
+  };
+
+  document.addEventListener('qr-add-user', addUserEvent => {
+    console.info('got user: ', addUserEvent.detail);
+    addUserFromObj(addUserEvent.detail);
+  });
+
+  window.addEventListener('hashchange', hashEvent => {
+    handleHash(location.hash);
+  });
+
+  window.addEventListener('load', loadEvent => {
+    handleHash(location.hash);
+    //atob("TWF0dGhldyBMYXRlZ2FuCU1hbGUJNDM3CVI=").split('\t').join('\n')
+  });
 </script>
 
 </body>
