@@ -1,0 +1,511 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html {
+            height: 100%;
+            font-family: sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        textarea {
+            display: grid;
+            flex-direction: row;
+            width: 100%;
+            margin-right: 0em;
+            font-family: monospace;
+        }
+
+        button {
+            border: 1px solid #eee;
+            border-radius: 0.4em;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .close {
+            background-color: black;
+            color: white;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .header {
+            color: white;
+            background-color: black;
+        }
+
+        .scroll {
+            overflow-y: scroll;
+        }
+
+        .comfort {
+            padding: 1em;
+        }
+
+        .pad-left {
+            padding-left: 1em;
+        }
+
+        .foot {
+            font-size: smaller;
+            text-align: center;
+            background-color: #eee;
+        }
+
+        .flex {
+            flex: 1;
+        }
+
+        .flex-grow {
+            /* flex: 1; */
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .card {
+            box-shadow: 0px 0px 7px 0px rgba(0, 0, 0, 0.4);
+            padding: 1em;
+            margin-bottom: 1em;
+            border-radius: 0.7em;
+        }
+
+        button {
+            margin: 0.3em;
+        }
+
+        button[disabled] {
+            color: #666;
+            background-color: #eee;
+        }
+
+        .warn {
+            background-color: orangered;
+        }
+
+        .primary {
+            color: white;
+            background-color: dodgerblue;
+            border: 1px solid white;
+        }
+
+        .modal {
+            position: fixed;
+            margin-left: auto;
+            margin-right: auto;
+            width: 600px;
+            left: calc(50% - 300px);
+            top: calc(20%);
+            background-color: white;
+
+            /*border: 1px solid black;*/
+        }
+
+        textarea.js-modal-text {
+            resize: vertical;
+        }
+
+        table {
+            border: 1px solid #eee;
+        }
+
+        td {
+          border: 0.5px solid #eee;
+        }
+    </style>
+    <title>Spartan Routes</title>
+</head>
+
+<body>
+<div class="grid-container">
+    <div class="header">
+        <h3 class="pad-left">Spartans: Result Merger</h3>
+    </div>
+
+    <div class="middle scroll comfort flex">
+
+        <h3 data-title>Title</h3>
+
+        <section>
+            <h4>Scan CSV</h4>
+
+            <textarea id="scanData"></textarea>
+        </section>
+
+        <section>
+            <h4>Lap CSV</h4>
+            <textarea id="lapData"></textarea>
+        </section>
+
+
+        <div>
+            <button data-action="mergeData" class="js-button-get-text">Merge!</button>
+        </div>
+
+        <section>
+            <h4>Results</h4>
+
+            <table id="results" cellpadding="3" border="0" cellspacing="0">
+                <thead>
+
+                <tr>
+                    <th>Race Time</th>
+                    <th>Position</th>
+                    <th>Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>race_time</td>
+                    <td>Position</td>
+                    <td>Name</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
+
+    </div>
+
+
+    <div class="foot comfort">
+        Spartan Harriers - 2018
+    </div>
+</div>
+
+<div hidden data-templates>
+    <div class="js-date-dialog card" data-display data-template="js-date-dialog">
+        <div class="row">
+            <span class="flex"></span>
+
+            <button data-action="removeDateDialog" class="close">X</button>
+        </div>
+        <div class="row">
+            Select Date
+            <input data-field="date" type="date"/>
+            Time
+            <input data-field="time" type="time"/>
+        </div>
+
+        <div class="js-distance-container">
+            <div class="js-distances">
+                <p class="js-distance" data-distance-id="" data-template="js-distance">
+                    Distance <input data-field="distance" type="number"> Link <input data-field="link" type="text">
+                </p>
+            </div>
+
+            <button data-action="addDistance">Add Distance</button>
+        </div>
+    </div>
+
+    <div data-template="js-notes">
+        <div class="card">
+            <h4>Additional Notes</h4>
+            <textarea style="resize:none;" data-field="notes" rows="10"></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="modal card" data-modal-id="routeText" hidden>
+    <div class="row">
+        <span class="flex"></span>
+
+        <button data-action="removeModalDialog" class="close">X</button>
+    </div>
+    <h1 class="js-modal-title">Routes Text</h1>
+
+    <textarea class="js-modal-text" rows="20" readonly></textarea>
+</div>
+
+</body>
+<script>
+  let db = {};
+
+  let cards = [];
+  let notes = '';
+
+  let title = document.querySelector('[data-title]');
+
+  title.innerText = 'Merge Scan and Lap Data';
+
+
+  const DateFormat = {
+    dow: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    monthFull: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+
+    summary: (fd, ld) => `${fd.getDate()} ${DateFormat.month[fd.getMonth()]} - ${ld.getDate()} ${DateFormat.month[ld.getMonth()]} ${ld.getFullYear()}`,
+
+    nn: i => i < 10 ? `0${i}` : `${i}`,
+
+    asYMD: (date) => [date.getFullYear(), date.getMonth() + 1, date.getDate()]
+      .map(DateFormat.nn)
+      .join("-"),
+
+    asUTC: date => {
+
+      let time = [date.getUTCHours(), date.getUTCMinutes()].map(DateFormat.nn).join(':');
+
+      let string_for_date = `${date.getUTCFullYear()}-${DateFormat.nn(date.getMonth() + 1)}-${DateFormat.nn(date.getDate())}T${time}:00Z`;
+      console.info('string-for-date: ', string_for_date);
+      return new Date(string_for_date);
+    },
+
+    dateString: date => {
+      let d = new Date(date);
+      let dow = DateFormat.dow[d.getDay()];
+      let month = DateFormat.month[d.getMonth()];
+
+      return `${dow} ${d.getDate()} ${month} ${d.getFullYear()} @ ${d.getHours()}:${d.getMinutes() <= 9 ? '0' : ''}${d.getMinutes()}`;
+    },
+
+    timeString: date => {
+      let d = new Date(date);
+      return [
+        `${d.getUTCHours() <= 9 ? '0' : ''}${d.getUTCHours()}`,
+        `:`,
+        `${d.getUTCMinutes() <= 9 ? '0' : ''}${d.getUTCMinutes()}`
+      ].join('');
+    }
+  };
+
+  function findTemplate(selector) {
+    if (!selector) {
+      alert('no selector provided');
+      return undefined;
+    }
+
+    let templates = document.querySelector('[data-templates]');
+    let template = templates.querySelector(`[data-template='${selector}']`);
+    let newNode = template.cloneNode(true);
+    newNode.removeAttribute('data-template');
+    return newNode;
+  }
+
+  function nextIdFrom(col) {
+    return col.map(c => c.id).reduce((acc, next) => next > acc ? next : acc, -1) + 1;
+  }
+
+  function newDate() {
+    let maxId = nextIdFrom(cards);
+    cards.push({
+      id: maxId,
+      date: new Date(),
+      time: new Date(),
+      distances: []
+    });
+  }
+
+  function render() {
+    const cardsList = document.querySelector('div.js-cards-list');
+    cardsList.innerHTML = '';
+    cards.forEach(card => {
+      const cardNode = findTemplate('js-date-dialog');
+      cardNode.setAttribute('data-card-id', card.id);
+      cardNode.querySelector('input[data-field=date]').valueAsDate = new Date(DateFormat.asYMD(card.date));
+      cardNode.querySelector('input[data-field=time]').valueAsDate = DateFormat.asUTC(card.time);
+
+      // distances
+      cardNode.querySelector('div.js-distances').innerHTML = '';
+      card.distances.forEach(distance => {
+        const distNode = findTemplate('js-distance');
+        distNode.setAttribute('data-distance-id', distance.id);
+        distNode.querySelector(`[data-field='distance']`).value = distance.distance;
+        distNode.querySelector(`[data-field='link']`).value = distance.link;
+
+        cardNode.querySelector('div.js-distances').appendChild(distNode);
+      });
+
+      document.querySelector('div.js-cards-list').appendChild(cardNode);
+    });
+
+    let btnGetText = document.querySelector('button.js-button-get-text');
+    if (cards.length > 0) {
+      btnGetText.classList.add('primary');
+      btnGetText.removeAttribute('disabled');
+    } else {
+      btnGetText.classList.remove('primary');
+      btnGetText.setAttribute('disabled', '');
+    }
+  }
+
+  function findUpwards(from, selector) {
+    if (from.attributes[selector]) {
+      return from;
+    } else {
+      return findUpwards(from.parentNode, selector);
+    }
+  }
+
+  function removeDateDialog(event) {
+    let removeId = Number(findUpwards(event.target, 'data-card-id').dataset.cardId);
+    cards = cards.filter(c => c.id !== removeId);
+  }
+
+  function removeModalDialog(event) {
+    let d = findUpwards(event.target, 'data-modal-id');
+    if (d) {
+      d.setAttribute('hidden', '');
+    }
+  }
+
+  function addDistance(event) {
+    console.info('add distance requested: ', event);
+    let cardId = Number(findUpwards(event.target, 'data-card-id').dataset.cardId);
+    let card = cards.filter(c => c.id === cardId)[0];
+    card.distances.push({id: nextIdFrom(card.distances), distance: 0, link: 'https://'});
+  }
+
+  function newNote(event) {
+    event.target.remove();
+
+    let jsNotes = findTemplate('js-notes');
+    document.querySelector('div.js-notes').appendChild(jsNotes);
+  }
+
+  function produceNote(cards, notes) {
+    // find date range
+    let sortedCards = cards.sort((a, b) => Date.parse(a.date.toJSON()) > Date.parse(b.date.toJSON()) ? 0 : -1);
+    let firstCard = sortedCards[0];
+    let lastCard = sortedCards.reduce((acc, next) => next);
+
+    let dateSections = sortedCards
+      .map(card => ['',
+        `* ${DateFormat.dow[card.date.getDay()]} ${card.date.getDate()} ${DateFormat.monthFull[card.date.getMonth()]} @ ${DateFormat.timeString(card.time)}`
+      ].concat(card.distances.map(dist => `  - ${dist.distance}km:${dist.link}`)));
+
+    let lines = [
+      `Routes for the week: ${DateFormat.summary(firstCard.date, lastCard.date)}`,
+      '',
+      '(Please click through to full post for all links)',
+      '']
+      .concat(dateSections.reduce((acc, next) => acc.concat(next)));
+
+    return (notes ? lines.concat(['', '** Additional Notes', '', notes]) : lines).join('\n');
+  }
+
+  function getPostText(event) {
+    let textArea = document.querySelector('.js-modal-text');
+    textArea.value = produceNote(cards, notes);
+    let modal = document.querySelector('[data-modal-id=routeText]');
+    modal.removeAttribute('hidden');
+    textArea.select();
+    document.execCommand('copy');
+  }
+
+  document.addEventListener('input', e => {
+    console.info('input change: ', e);
+    let dateCard = findUpwards(e.target, `data-card-id`);
+
+    if (dateCard) {
+      let cardId = Number(dateCard.attributes['data-card-id'].value);
+      let card = cards.filter(c => c.id === cardId)[0];
+
+      if (e.target.dataset.field === 'date') {
+        card.date = new Date(e.target.value);
+      }
+
+      if (e.target.dataset.field === 'time') {
+        card.time = new Date(`${new Date().getUTCFullYear()}-01-01T${e.target.value}:00Z`);
+      }
+
+      if (['link', 'distance'].indexOf(e.target.dataset.field) > -1) {
+        let dist = findUpwards(e.target, 'data-distance-id');
+        let distId = Number(dist.attributes['data-distance-id'].value);
+
+        card.distances.filter(d => d.id === distId)[0][e.target.dataset.field] = e.target.value;
+      }
+    }
+
+    if (e.target.dataset.field === 'notes') {
+      notes = target.value;
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.dataset.action) {
+      let fn = window[e.target.dataset.action];
+      if (!fn) {
+        console.error(`No function called '${e.target.dataset.action}' found.`);
+      } else {
+        fn(e);
+        render();
+      }
+    }
+  });
+
+  function mergeData() {
+    let scans = scanData.value
+      .split('\n')
+      .map(row => row.split(','))
+      .map(row => ({
+        seq: /\d+/.test(row[0]) ? Number(row[0]) : row[0],
+        name: row[1],
+        id: row[2],
+        scantimestamp: row[3]
+      })).reduce((acc, next) => {
+        return Object.assign({}, acc, {[next['seq']]: next});
+      }, {});
+
+    let laps = lapData.value.split('\n')
+      .map(row => row.split(','))
+      .map(row => ({
+        seq: /\d+/.test(row[0]) ? Number(row[0]) : row[0],
+        timestamp: row[1]
+      })).reduce((acc, next) => {
+        return Object.assign({}, acc, {[next['seq']]: next});
+      }, {});
+
+    console.info(Object.keys(laps));
+    console.info({laps: laps, scans: scans});
+
+    let merged = Object.keys(laps).filter(x => /\d+/.test(x)).map(Number).reduce((acc, next) => {
+
+      return Object.assign({}, acc, {[next]: Object.assign(laps[next], scans[next])});
+    }, {});
+
+    let r = new RegExp('\\d{4}-\\d{2}-\\d{2}T(\\d\\d:\\d\\d:\\d\\d\\.\\d{3})Z');
+    Object.keys(merged).forEach(idx => {
+      merged[idx].race_time =  r.exec(new Date(new Date(merged[idx].timestamp) - new Date(merged[0].timestamp)).toISOString())[1];
+    });
+
+    window.merged = merged;
+
+    renderResults(merged);
+
+  }
+
+  function renderResults(data) {
+    document.querySelector('table#results').querySelector('tbody').innerHTML = Object.keys(data).map(seq => {
+      return `<tr>
+                    <td>${data[seq].race_time}</td>
+                    <td>${seq}</td>
+                    <td>${data[seq].name}</td>
+                </tr>`
+    }).join('\n');
+  }
+
+
+</script>
+</body>
+
+</html>
