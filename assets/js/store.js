@@ -21,8 +21,8 @@ const Store = {
   addScan: Session.sessionArraySerializerFor('scans'),
 
   translateToCsv: (collection) => {
-    if (!collection) {
-      return undefined;
+    if (!collection || collection.length === 0) {
+      return null;
     }
     return [Object.keys(collection[0]).join(',')]
       .concat(collection.map(row => Object.values(row).join(',')))
@@ -62,17 +62,22 @@ const Store = {
     return buffer.join('\n');
   },
 
-  initiateDownload: (type, data) => {
+  initiateDownload: (type, data, prefix = undefined) => {
     let blob = new Blob([data], {
       type: type
     });
     let link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
-    link.download = new URL(new URL(link.href).pathname).pathname.substr(1) +
+    link.download = [
+      prefix ? `${prefix}-` : undefined,
+      `${new Date().toISOString()}-`,
+      new URL(new URL(link.href).pathname).pathname.substr(1),
       ((t) => (({
         ['application/json']: '.json',
         ['text/csv']: '.csv'
-      })[t] || ''))(type);
+      })[t] || ''))(type)
+    ].filter(x => x).join('');
+
     link.click();
   },
 
@@ -84,7 +89,7 @@ const Store = {
       return;
     }
 
-    Store.initiateDownload('text/csv', csvData);
+    Store.initiateDownload('text/csv', csvData, 'scans');
   },
 
   exportLapCSV: () => {
@@ -104,7 +109,13 @@ const Store = {
       }, []);
 
     let lapCsv = Store.translateToCsv(lapArr);
-    Store.initiateDownload('text/csv', lapCsv);
+    if (lapCsv) {
+      Store.initiateDownload('text/csv', lapCsv, 'laps');
+    } else {
+      instruction('No data available for export.');
+      UI.toggleNav({});
+      return;
+    }
   },
 
   exportStore: () => {
@@ -114,7 +125,7 @@ const Store = {
       timer: Session.sessionObjectGetter('timer')
     };
 
-    Store.initiateDownload('application/json', JSON.stringify(storeJson));
+    Store.initiateDownload('application/json', JSON.stringify(storeJson), 'journal');
   },
 
   purge: () => {
