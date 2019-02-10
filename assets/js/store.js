@@ -40,7 +40,8 @@ const Store = {
   asHTML: () => {
     let buffer = [];
     let scans = Store.listScans().scans;
-    if (!scans) {
+    console.debug('scans: ', scans);
+    if (!scans || scans.length === 0) {
       return `<pre class="warning">No scans in store for current session.</pre>`;
     }
     let headers = Object.keys(scans[0]);
