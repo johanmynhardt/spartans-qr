@@ -180,6 +180,16 @@
             <div id="qr-generate" class="with-margin"></div>
 
             <input id="qrinput" class="with-margin" oninput="QR.makeCode(this.value, {qrid: 'qr-generate'})"/>
+
+            <ul>
+                Predefined commands:
+                <li>
+                    <button data-action="make-cmd" data-cmd="sync-session">Sync Session</button>
+                </li>
+                <li>
+                    <button data-action="make-cmd" data-cmd="toast" data-text="Ping!">Ping!</button>
+                </li>
+            </ul>
         </div>
 
         <div class="js-scan-started with-margin" hidden data-display>

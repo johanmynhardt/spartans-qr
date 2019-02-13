@@ -136,9 +136,11 @@ const scanState = {
     },
     fn: function (content) {
       let result = this.test(content);
+      console.info('set session result: ', result);
       if (result[1]) {
         Store.saveSessionId(result[1]);
         instruction(`session set from scan: ${result[1]}`);
+        location.reload(false);
         return true;
       }
       return false;
@@ -269,5 +271,25 @@ window.addEventListener('load', () => {
 document.addEventListener('doSpeak', e => {
   if (e.detail) {
     window.speechSynthesis.speak(new SpeechSynthesisUtterance(e.detail));
+  }
+});
+
+document.addEventListener('click', e => {
+
+  if (e.target.dataset.action === 'make-cmd') {
+    let cmd = e.target.dataset.cmd;
+
+    const cmds = {
+      toast: (dataset = {}) => `[cmd:toast:${dataset.text ? dataset.text : '<text>'}]`,
+
+      ['sync-session']: (dataset = {}) => `[cmd:session:${Store.currentSession()}]`
+    };
+
+    let cmdfn = cmds[cmd];
+    if (cmdfn) {
+      let cmdtext = cmdfn(e.target.dataset);
+      qrinput.value = cmdtext;
+      QR.makeCode(cmdtext, {qrid: 'qr-generate'});
+    }
   }
 });
