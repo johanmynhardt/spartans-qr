@@ -499,7 +499,7 @@
       return `<tr>
                     <td>${seq < 10 ? '00' + seq : seq < 100 ? '0' + seq : seq}</td>
                     <td>${data[seq].race_time}</td>
-                    <td>${data[seq].name ? data[seq].name : 'No Scan'}</td>
+                    <td>${data[seq].name ? data[seq].name : '[--No Scan--]'}</td>
                 </tr>`
     }).join('\n');
   }
