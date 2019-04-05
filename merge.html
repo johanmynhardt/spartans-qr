@@ -168,15 +168,15 @@
                 <thead>
 
                 <tr>
-                    <th>Race Time</th>
                     <th>Position</th>
+                    <th>Race Time</th>
                     <th>Name</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td>race_time</td>
                     <td>Position</td>
+                    <td>race_time</td>
                     <td>Name</td>
                 </tr>
                 </tbody>
@@ -497,9 +497,9 @@
   function renderResults(data) {
     document.querySelector('table#results').querySelector('tbody').innerHTML = Object.keys(data).map(seq => {
       return `<tr>
+                    <td>${seq < 10 ? '00' + seq : seq < 100 ? '0' + seq : seq}</td>
                     <td>${data[seq].race_time}</td>
-                    <td>${seq}</td>
-                    <td>${data[seq].name}</td>
+                    <td>${data[seq].name ? data[seq].name : 'No Scan'}</td>
                 </tr>`
     }).join('\n');
   }
