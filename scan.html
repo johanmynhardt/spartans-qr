@@ -327,6 +327,22 @@
     <!-- END -->
 </div>
 
+<script type="application/javascript">
+  if ('serviceWorker' in navigator) {
+    console.info("Registering service worker...");
+    navigator.serviceWorker
+      .register('assets/js/serviceworker.js')
+      .then(function(reg){
+        console.info("assets/js/serviceworker.js registered: ", reg);
+      })
+      .catch(function(err) {
+        console.error("Service Worker not registered. Error: ", err);
+      });
+  } else {
+    console.warn('Service Workers not supported.');
+  }
+</script>
+
 </body>
 
 </html>
