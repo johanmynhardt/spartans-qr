@@ -341,22 +341,64 @@
   users.forEach(makeCard);
   updateUsers();
 
-  const handleHash = hash => {
-    if (hash && hash.indexOf("data:") > -1) {
-      let edata = hash.substr(hash.indexOf('data:') + 'data:'.length);
+  const hashHandlers = [
+    {
+      regex: /^#data:(.*)/,
+      test: function(h) { return this.regex.test(h); },
+      handleHash: function(hash) {
+        let edata = this.regex.exec(hash)[1];
         console.info("edata: ", edata);
 
-      let data = atob(edata).split('\t');
-      if (data.length === 4) {
-        console.info('data: ', data);
-        data = (d => ({name: d[0], gender: d[1], member_no: d[2], discipline: d[3]}))(data);
+        let data = atob(edata).split('\t');
+        if (data.length === 4) {
+          console.info('data: ', data);
+          data = (d => ({name: d[0], gender: d[1], member_no: d[2], discipline: d[3]}))(data);
+          console.info('data: ', data);
+          addUserFromObj(data);
+          updateUsers();
+        } else {
+          console.warn('Expected 4 fields. Got ' + data.length);
+        }
+      }
+    },
+    {
+      regex: /^#clear-data:(.*)/,
+
+      test: function (h) {
+        return this.regex.test(h);
+      },
+
+      handleHash: function (h) {
+        let result = this.regex.exec(h);
+        let group = result[1];
+        console.info('clear-data: ', group);
+
+        let params = group.split('&')
+          .reduce((acc, next) => {
+            let kv = next.split('=', 2);
+            acc[kv[0]] = decodeURIComponent(kv[1]);
+            return acc;
+          }, {});
+
+        console.info('params: ', params);
+        let data = (d => ({
+          name: d['name'],
+          gender: d['g'],
+          member_no: d['mn'],
+          discipline: d['d']
+        }))(params);
         console.info('data: ', data);
         addUserFromObj(data);
         updateUsers();
-      } else {
-        console.warn('Expected 4 fields. Got ' + data.length);
       }
     }
+  ];
+
+  const handleHash = hash => {
+    console.info('handling hash: ', hash);
+    hashHandlers.filter(h => h.test(hash)).forEach(x => {
+      x.handleHash(hash);
+    })
   };
 
   document.addEventListener('qr-add-user', addUserEvent => {
