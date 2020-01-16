@@ -132,6 +132,7 @@
 
     <!-- <button class="no-print" onclick="showUserForm(true);">Add Person</button> -->
     <button class="no-print" onclick="showCSVForm(true);">Add from CSV</button>
+    <button class="no-print" data-action="set-custom-image">Set Custom Image</button>
 
     <div data-dialog-csv hidden class="dialog no-print">
         <h3>Add from CSV</h3>
@@ -416,6 +417,20 @@
   window.addEventListener('load', loadEvent => {
     handleHash(location.hash);
     //atob("TWF0dGhldyBMYXRlZ2FuCU1hbGUJNDM3CVI=").split('\t').join('\n')
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.dataset.action === 'set-custom-image') {
+      const newImg = window.prompt('Paste the URL of your custom image.', document.querySelector('div.sh-logo img').src);
+      if (newImg && newImg != '') {
+        document.querySelectorAll('div.sh-logo img').forEach(img => {
+          img.src = newImg;
+          img.width = 114;
+          img.height = 114; 
+        })
+      }
+      
+    }
   });
 </script>
 
